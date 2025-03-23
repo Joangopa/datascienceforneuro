@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Carregar os dados
-@st.cache
+@st.cache_data
 def load_data():
     data = pd.read_csv('arquivos/oasis_cross-sectional.csv')
     # Filtrar os dados onde MMSE e CDR não são nulos
