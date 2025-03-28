@@ -33,6 +33,7 @@ def load_data():
     data.drop('Delay', axis=1, inplace=True)
     return data
 
+
 @st.cache_data
 def load_data2():
     data = pd.read_csv('arquivos/oasis_cross-sectional.csv')
@@ -51,7 +52,7 @@ data = load_data()
 
 
 # Criando as abas
-tab1, tab2, tab3, tab4 = st.tabs(["📌 Introdução ao Problema", "📊 Introdução aos Dados", "📈 Resultados", "Conclusões"])
+tab1, tab2, tab3, tab4 = st.tabs(["📌 Introdução ao Problema", "📊 Introdução aos Dados", "📈 Análises", "Conclusões"])
 
 with tab1:
     st.header("Introdução ao Problema")
@@ -61,14 +62,15 @@ with tab1:
 
     with col1:
 
-        st.write("""
-            - A doença de Alzheimer é uma doença cerebral degenerativa sem cura
-            - É caracterizada por atrofia progressiva do córtex cerebral
-            - Causa perda de memória, aumento dos déficits cognitivos e potencial perda das funções motoras
-            - É o tipo mais comum de demência e a sexta principal causa de morte nos EUA
-            - O diagnóstico é um processo intenso, lento e caro que envolve exames físicos e mentais, testes laboratoriais e neurológicos, e exames de imagem
-            - Com um diagnóstico precoce, a progressão pode ser retardada e os sintomas tratados.
-        """)
+        with st.container(border=True):  # Disponível no Streamlit >= 1.29.0
+            st.write("""
+                    - A doença de Alzheimer é uma doença cerebral degenerativa sem cura
+                    - É caracterizada por atrofia progressiva do córtex cerebral
+                    - Causa perda de memória, aumento dos déficits cognitivos e potencial perda das funções motoras
+                    - É o tipo mais comum de demência e a sexta principal causa de morte nos EUA
+                    - O diagnóstico é um processo intenso, lento e caro que envolve exames físicos e mentais, testes laboratoriais e neurológicos, e exames de imagem
+                    - Com um diagnóstico precoce, a progressão pode ser retardada e os sintomas tratados.
+            """)
 
         st.image("brain_atrophy.jpg", caption="Atrofia Cerebral",  width=600)
         
@@ -145,7 +147,7 @@ with tab3:
     
     # st.header("Análise de Correlação")
 
-    subtab1, subtab2, subtab3, subtab4 = st.tabs(["metricas", "📊 Análise de Correlação", "subtab3", "subtab4"])
+    subtab1, subtab2, subtab3, subtab4 = st.tabs(["Distribuição de CDR", "📊 Análise de Correlação", "vWBV vs CDR", "MMSE vs CDR"])
     
     
 
