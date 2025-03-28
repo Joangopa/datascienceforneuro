@@ -76,7 +76,7 @@ with tab1:
     with col1:
         
         # st.subheader("Introdução ao Problema")
-        with st.container(border=True):  # Disponível no Streamlit >= 1.29.0
+        with st.container(border=True):  
             st.write("""
                     - A doença de Alzheimer é uma doença cerebral degenerativa sem cura
                     - É caracterizada por atrofia progressiva do córtex cerebral

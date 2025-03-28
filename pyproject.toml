@@ -1,21 +1,19 @@
-[project]
+[tool.poetry]
 name = "data-science-neuroscience"
 version = "0.1.0"
 description = ""
-authors = [
-    {name = "Joangopa",email = "andresgomez1796@gmail.com"}
-]
+authors = ["Joangopa <andresgomez1796@gmail.com>"]
 readme = "README.md"
-requires-python = ">=3.12"
-dependencies = [
-    "streamlit (>=1.43.2,<2.0.0)",
-    "pandas (>=2.2.3,<3.0.0)",
-    "matplotlib (>=3.10.1,<4.0.0)",
-    "seaborn (>=0.13.2,<0.14.0)",
-    "scikit-learn (>=1.6.1,<2.0.0)",
-    "plotly (>=6.0.1,<7.0.0)"
-]
+packages = [{ include = "data_science_neuroscience" }]  # Ensure this matches your package directory
 
+[tool.poetry.dependencies]
+python = ">=3.12"
+streamlit = ">=1.43.2,<2.0.0"
+pandas = ">=2.2.3,<3.0.0"
+matplotlib = ">=3.10.1,<4.0.0"
+seaborn = ">=0.13.2,<0.14.0"
+scikit-learn = ">=1.6.1,<2.0.0"
+plotly = ">=6.0.1,<7.0.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
