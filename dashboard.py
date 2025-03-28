@@ -104,7 +104,7 @@ with estudo:
             st.write("""
                     - 416 pessoas participaram do estudo;
                     - Idades entre 18 e 96 anos;
-                    - Para cada pessoa, são incluídas 3 ou 4 ressonâncias magnéticas individuais ponderadas em T1, obtidas em sessões de varredura única;
+                    - Para cada pessoa, são incluídas dados de ressonâncias magnéticas individuais, obtidas em sessões de varredura única;
                     - Todos destros;
                     - Inclui homens e mulheres;
                     - Um conjunto de dados de confiabilidade é incluído contendo 20 sujeitos não dementes fotografados em uma visita subsequente dentro de 90 dias de sua sessão inicial.
