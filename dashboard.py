@@ -13,6 +13,17 @@ st.set_page_config(
     layout="wide"
 )
 
+st.markdown(
+    """
+    <style>
+        .stApp {
+            background-color: #f0f0f0;  /* Cor de fundo cinza claro */
+        }
+    </style>
+    """, 
+    unsafe_allow_html=True
+)
+
 # Carregar os dados
 @st.cache_data
 def load_data():
@@ -40,7 +51,7 @@ data = load_data()
 
 
 # Criando as abas
-tab1, tab2, tab3 = st.tabs(["📌 Introdução ao Problema", "📊 Introdução aos Dados", "📈 Resultados"])
+tab1, tab2, tab3, tab4 = st.tabs(["📌 Introdução ao Problema", "📊 Introdução aos Dados", "📈 Resultados", "Conclusões"])
 
 with tab1:
     st.header("Introdução ao Problema")
@@ -134,7 +145,7 @@ with tab3:
     
     # st.header("Análise de Correlação")
 
-    subtab1, subtab2, subtab3 = st.tabs(["metricas", "📊 Análise de Correlação", "subtab3"])
+    subtab1, subtab2, subtab3, subtab4 = st.tabs(["metricas", "📊 Análise de Correlação", "subtab3", "subtab4"])
     
     
 
@@ -155,14 +166,34 @@ with tab3:
 
         cdr_table = cdr_table[['CDR','Interpretação','Count']]
 
-        st.dataframe(
-                cdr_table.style
-                .background_gradient(cmap='Blues', subset=['Count'])
-                .format({'Count': '{:,}', 'CDR': '{:.1f}'}),  # Formata números com separador de milhar
-                use_container_width=False,  # Não usar toda a largura
-                hide_index=True
-            )
+        #st.dataframe(
+        #        cdr_table.style
+        #        .background_gradient(cmap='Blues', subset=['Count'])
+        #        .format({'Count': '{:,}', 'CDR': '{:.1f}'}),  # Formata números com separador de milhar
+        #        use_container_width=False,  # Não usar toda a largura
+        #        hide_index=True
+        #    )
     
+        plt.figure(figsize=(5, 3))
+        ax = sns.barplot(x='Count', y='Interpretação', data=cdr_table, hue='Interpretação', palette='viridis', dodge=False)
+
+        # Adicionando os valores de contagem no final de cada barra
+        for index, row in cdr_table.iterrows():
+            ax.text(row['Count'] + 1, index, str(row['Count']), color='black', va='center')
+
+        # Remover as bordas do gráfico
+        for spine in ax.spines.values():
+            spine.set_visible(False)
+
+        # Adicionando títulos e rótulos
+        plt.title('Distribuição de Contagem de Casos por Tipo de Demência')
+        plt.xlabel('Contagem')
+        plt.ylabel('Tipo de Demência')
+
+        # Exibindo o gráfico no Streamlit
+        st.pyplot(plt, use_container_width=False)
+        
+
     with subtab2:
     
         # Criar duas colunas (1:2 - a figura ocupará 1/3 do espaço)
@@ -224,3 +255,23 @@ with tab3:
         color_discrete_sequence=['#6baed6', '#1f78b4', '#fb9a99', '#e31a1c']  
     )
         st.plotly_chart(fig2, use_container_width=True)
+
+    with subtab4:
+        
+        custom_colors = ['#6baed6', '#1f78b4', '#fb9a99', '#e31a1c']   # Azul claro, azul escuro, vermelho claro, vermelho escuro
+
+        # Criando o gráfico
+        fig5 = px.histogram(
+            data,
+            x='MMSE',
+            color='CDR',
+            nbins=20,
+            title='Distribuição do MMSE por CDR',
+            labels={'MMSE': 'Pontuação MMSE', 'CDR': 'CDR'},
+            color_discrete_sequence=custom_colors  # Usando a paleta de cores personalizada
+        )
+
+        st.plotly_chart(fig5, use_container_width=False)
+
+with tab4:
+      st.subheader("Conclusões")
