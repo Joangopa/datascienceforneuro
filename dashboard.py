@@ -52,58 +52,78 @@ data = load_data()
 
 
 # Criando as abas
-tab1, tab2, tab3, tab4 = st.tabs(["📌 Introdução ao Problema", "📊 Introdução aos Dados", "📈 Análises", "Conclusões"])
+title, tab1,  estudo, tab2, tab3, tab4 = st.tabs(["-", "📌 Introdução ao Problema", "Estudo",  "📊 Introdução aos Dados", "📈 Análises", "Conclusões"])
+
+with title:
+    st.markdown(
+        """
+        <h1 style="text-align: center; font-size: 40px; color: #0073e6;">
+            Análise de Alzheimer: Diagnóstico e Tendências
+        </h1>
+        """,
+        unsafe_allow_html=True
+    )
+    col1, col2, col3 = st.columns([1, 1, 1])
+
+    with col2:
+        st.image("image_title.webp", use_container_width =False,  width=400)
+
 
 with tab1:
-    st.header("Introdução ao Problema")
-
-
+    
     col1, col2 = st.columns([1, 1])
 
     with col1:
-
+        
+        # st.subheader("Introdução ao Problema")
         with st.container(border=True):  # Disponível no Streamlit >= 1.29.0
             st.write("""
                     - A doença de Alzheimer é uma doença cerebral degenerativa sem cura
                     - É caracterizada por atrofia progressiva do córtex cerebral
                     - Causa perda de memória, aumento dos déficits cognitivos e potencial perda das funções motoras
-                    - É o tipo mais comum de demência e a sexta principal causa de morte nos EUA
-                    - O diagnóstico é um processo intenso, lento e caro que envolve exames físicos e mentais, testes laboratoriais e neurológicos, e exames de imagem
                     - Com um diagnóstico precoce, a progressão pode ser retardada e os sintomas tratados.
             """)
 
-        st.image("brain_atrophy.jpg", caption="Atrofia Cerebral",  width=600)
+            # Criando três colunas: esquerda, centralizada e direita
+        col_empty1, col_img, col_empty2 = st.columns([1, 2, 3])
+
+        with col_img:
+            st.image("brain_atrophy.jpg", caption="Atrofia Cerebral", width=400)
         
     with col2:  
         # Você pode adicionar imagens, gráficos ou outros elementos
         
-        st.image("sinais-de-alzheimer.jpg", caption="Sinais de Alzheimer", width=700)
+        st.image("sinais-de-alzheimer.jpg", caption="Sinais de Alzheimer", width=500)
 
 
+with estudo: 
+
+    st.subheader("Descrição da coleta dos dados:")
+
+    with st.container(border=True):  # Disponível no Streamlit >= 1.29.0
+            st.write("""
+                    - 416 pessoas participaram do estudo;
+                    - Idades entre 18 e 96 anos;
+                    - Para cada pessoa, são incluídas 3 ou 4 ressonâncias magnéticas individuais ponderadas em T1, obtidas em sessões de varredura única;
+                    - Todos destros;
+                    - Inclui homens e mulheres;
+                    - Um conjunto de dados de confiabilidade é incluído contendo 20 sujeitos não dementes fotografados em uma visita subsequente dentro de 90 dias de sua sessão inicial.
+            """)
 
 with tab2:
-    st.header("Introdução aos Dados")
+
+    
+    # st.header("Introdução aos Dados")
     
     # Criando duas colunas (a primeira será mais larga para a imagem)
-    col1, col2 = st.columns([2, 3])  # Proporção 2:3 (ajuste conforme necessário)
+    col1, col2 = st.columns([1, 1])  # Proporção 2:3 (ajuste conforme necessário)
     
-    with col2:
-        #st.subheader("Descrição das Variáveis")
-        #st.write("""
-        #- **CDR : Clinical Dementia Rating.** 
-        #- **eTIV : Estimated Total Intracranial Volume.** A variável eTIV estima o volume cerebral intracraniano.
-        #- **nWBV : Normalize Whole Brain Volume.** Representa a porcentagem da cavidade intracraniana ocupada pelo cérebro.
-        #- **ASF : Atlas Scaling Factor.** A variável ASF é um fator de escala de um parâmetro que permite a comparação do volume intracraniano total estimado (eTIV) com base nas diferenças na anatomia humana.
-        #- **MMSE : Mini Mental State Examination**. O Mini Exame do Estado Mental (MMSE) é uma ferramenta que pode ser usada para avaliar sistematicamente e completamente o estado mental.
-        #""")
-        #if st.button("MMSE"):
-            
-        st.image("mmse.jpg", use_container_width=False, width=800)
+    
 
     with col1:
         info_variaveis_ = {
-        "Variable": ["ID", "M/F", "Hand", "Age", "Educ", "SES", "eTIV", "ASF", "nWBV",  "MMSE", "CDR"],
-        "Definition": [
+        "Variável": ["ID", "M/F", "Hand", "Age", "Educ", "SES", "eTIV", "ASF", "nWBV",  "MMSE", "CDR"],
+        "Definição": [
             "Identification", "Gender", "Dominant Hand", "Age in years", 
             "Education Level", "Socioeconomic Status", 
             "Estimated Total Intracranial Volume",
@@ -112,7 +132,7 @@ with tab2:
             "Mini Mental State Examination",  
             "Clinical Dementia Rating"
         ],
-        "Domain": [
+        "Valores": [
             " ", "M = Male, F = Female", "R = Right, L = Left", " ", 
             "1 = < Ensino Médio\n2 = Ensino Médio Completo\n3 = Ensino Superior Incompleto\n4 = Ensino Superior Completo\n5 = Pós-Graduação",
             "1 = Classe Baixa\n2 = Classe Média Baixa\n3 = Classe Média\n4 = Classe Média Alta\n5 = Classe Alta",
@@ -130,70 +150,89 @@ with tab2:
             <style>
             table {
                 width: 80%;
+                
             }
             th {
-                white-space: nowrap;
+                color: #0073e6 !important; /* Força a mudança da cor */
+                font-weight: bold; /* Deixa o texto em negrito */
+                white-space: nowrap; /* Mantém o texto em uma linha */
+                border: 1px solid black !important;
             }
             td {
                 white-space: pre-wrap;
+                border: 1px solid black !important;
             }
             </style>
             """,
             unsafe_allow_html=True
             )
+        
         st.table(info_variaveis)  
+
+    with col2:
+        st.subheader("Exemplo de Mini Mental State Examination")
+
+        st.image("mmse.jpg", use_container_width=False, width=800)
 
 with tab3:
     
     # st.header("Análise de Correlação")
 
-    subtab1, subtab2, subtab3, subtab4 = st.tabs(["Distribuição de CDR", "📊 Análise de Correlação", "vWBV vs CDR", "MMSE vs CDR"])
+    subtab1, subtab2, subtab3, subtab4 = st.tabs(["Distribuição de CDR", "Análise de Correlação", "vWBV vs CDR", "MMSE vs CDR"])
     
     
 
     with subtab1:
 
-
-        cdr_table = data.groupby(['CDR']).size().reset_index(name='Count')
+        col1, col2 = st.columns([2, 1])
         
-        cdr_descricao = {
-                0.0: 'Sem demência',
-                0.5: 'Demência muito leve',
-                1.0: 'Demência leve',
-                2.0: 'Demência moderada'
-            }
+        with col1:
+            cdr_table = data.groupby(['CDR']).size().reset_index(name='Count')
+            
+            cdr_descricao = {
+                    0.0: 'Sem demência',
+                    0.5: 'Demência muito leve',
+                    1.0: 'Demência leve',
+                    2.0: 'Demência moderada'
+                }
 
-                    # Substituir os valores da coluna CDR
-        cdr_table['Interpretação'] = cdr_table['CDR'].map(cdr_descricao)
+                        # Substituir os valores da coluna CDR
+            cdr_table['Interpretação'] = cdr_table['CDR'].map(cdr_descricao)
 
-        cdr_table = cdr_table[['CDR','Interpretação','Count']]
+            cdr_table = cdr_table[['CDR','Interpretação','Count']]
 
-        #st.dataframe(
-        #        cdr_table.style
-        #        .background_gradient(cmap='Blues', subset=['Count'])
-        #        .format({'Count': '{:,}', 'CDR': '{:.1f}'}),  # Formata números com separador de milhar
-        #        use_container_width=False,  # Não usar toda a largura
-        #        hide_index=True
-        #    )
-    
-        plt.figure(figsize=(5, 3))
-        ax = sns.barplot(x='Count', y='Interpretação', data=cdr_table, hue='Interpretação', palette='viridis', dodge=False)
+            #st.dataframe(
+            #        cdr_table.style
+            #        .background_gradient(cmap='Blues', subset=['Count'])
+            #        .format({'Count': '{:,}', 'CDR': '{:.1f}'}),  # Formata números com separador de milhar
+            #        use_container_width=False,  # Não usar toda a largura
+            #        hide_index=True
+            #    )
+        
+            plt.figure(figsize=(4, 2))
+            ax = sns.barplot(x='Count', y='Interpretação', data=cdr_table, hue='Interpretação', palette='viridis', dodge=False)
 
-        # Adicionando os valores de contagem no final de cada barra
-        for index, row in cdr_table.iterrows():
-            ax.text(row['Count'] + 1, index, str(row['Count']), color='black', va='center')
+            # Adicionando os valores de contagem no final de cada barra
+            for index, row in cdr_table.iterrows():
+                ax.text(row['Count'] + 1, index, str(row['Count']), color='black', va='center')
 
-        # Remover as bordas do gráfico
-        for spine in ax.spines.values():
-            spine.set_visible(False)
+            # Remover as bordas do gráfico
+            for spine in ax.spines.values():
+                spine.set_visible(False)
 
-        # Adicionando títulos e rótulos
-        plt.title('Distribuição de Contagem de Casos por Tipo de Demência')
-        plt.xlabel('Contagem')
-        plt.ylabel('Tipo de Demência')
+            # Adicionando títulos e rótulos
+            plt.title('Distribuição de Casos por Tipo de Demência')
+            plt.xlabel('Contagem')
+            plt.ylabel('Tipo de Demência')
 
-        # Exibindo o gráfico no Streamlit
-        st.pyplot(plt, use_container_width=False)
+            # Exibindo o gráfico no Streamlit
+            st.pyplot(plt, use_container_width=False)
+        
+        with col2:
+            st.markdown("""
+            - 100 dos sujeitos incluídos com mais de 60 anos foram clinicamente diagnosticados com doença de Alzheimer muito leve a moderada.
+            - Um conjunto de dados de confiabilidade é incluído contendo 20 sujeitos não dementes.
+            """)
         
 
     with subtab2:
@@ -260,20 +299,39 @@ with tab3:
 
     with subtab4:
         
-        custom_colors = ['#6baed6', '#1f78b4', '#fb9a99', '#e31a1c']   # Azul claro, azul escuro, vermelho claro, vermelho escuro
+        col1, col2 = st.columns([2, 1])
+        
+        with col1:
+            custom_colors = ['#6baed6', '#1f78b4', '#fb9a99', '#e31a1c']   # Azul claro, azul escuro, vermelho claro, vermelho escuro
 
-        # Criando o gráfico
-        fig5 = px.histogram(
-            data,
-            x='MMSE',
-            color='CDR',
-            nbins=20,
-            title='Distribuição do MMSE por CDR',
-            labels={'MMSE': 'Pontuação MMSE', 'CDR': 'CDR'},
-            color_discrete_sequence=custom_colors  # Usando a paleta de cores personalizada
-        )
+            # Criando o gráfico
+            fig5 = px.histogram(
+                data,
+                x='MMSE',
+                color='CDR',
+                nbins=20,
+                title='Distribuição do MMSE por CDR',
+                labels={'MMSE': 'Pontuação MMSE', 'CDR': 'CDR'},
+                color_discrete_sequence=custom_colors  # Usando a paleta de cores personalizada
+            )
 
-        st.plotly_chart(fig5, use_container_width=False)
+            st.plotly_chart(fig5, use_container_width=False)
 
+        with col2:
+            with st.container(border=True): 
+                st.markdown("""
+                Temos que 82% dos pacientes considerados obtiveram resultado superior a 23 no MMSE, 
+                onde 70% deles apresentaram um CDR = 0 e um 27% apresentaram CDR = 0.5. 
+                E 100% dos pacientes com CDR = 0 obtiveram resultado superior a 23.
+                """)
 with tab4:
       st.subheader("Conclusões")
+
+      with st.container(border=True): 
+                st.markdown("""
+                - Neste estudo, é um exemplo de que baixos resultados no MMSE são um sinal de alerta para possíveis casos de demência.
+
+                - Pode-se considerar realizar o MMSE a partir dos 60 anos.
+
+                - Exames de imagem são recomendados para fornecer uma conclusão após os resultados do MMSE.
+                """)
