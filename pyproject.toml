@@ -4,7 +4,8 @@ version = "0.1.0"
 description = ""
 authors = ["Joangopa <andresgomez1796@gmail.com>"]
 readme = "README.md"
-packages = [{ include = "data_science_neuroscience" }]  # Ensure this matches your package directory
+packages = [{ include = "datascienceforneuro" }]  # Ensure this matches your package directory
+package-mode = false
 
 [tool.poetry.dependencies]
 python = ">=3.12"
