@@ -10,6 +10,7 @@ import joblib
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
 
+from scipy.stats import shapiro, ttest_ind, mannwhitneyu
 
 
 
@@ -63,9 +64,9 @@ data2 = load_data2()
 
 
 # Criando as abas
-title, tab1,  estudo, tab2, tab3, tab4, tab_pred, tab_pca = st.tabs(["-", "📌 Introdução ao Problema", "Estudo",  
+title, tab1,  estudo, tab2, tab3, tab4, tab_pred, tab_pca, tab_simulacao = st.tabs(["-", "📌 Introdução ao Problema", "Estudo",  
                                                   "📊 Introdução aos Dados", "📈 Análises", "Conclusões",
-                                                  "Predições", "PCA e Agrupamento"])
+                                                  "Predições", "PCA e Agrupamento", "Simulações"])
 
 with title:
     st.markdown(
@@ -297,6 +298,8 @@ with tab3:
 
     with subtab3:
 
+        st.title("Análise Estatística de nWBV entre Pacientes com e sem Demência")
+
         fig2 = px.scatter(
         data2,
         x='Age',
@@ -310,8 +313,140 @@ with tab3:
     )
         st.plotly_chart(fig2, use_container_width=True)
 
+        nwbv_doentes_maiores_60 = data.loc[(data['Age'] > 60) & (data['CDR'] >0), ['nWBV']].reset_index(drop=True)
+        nwbv_nao_doentes_maiores_60 = data.loc[(data['Age'] > 60) & (data['CDR']  == 0), ['nWBV']]
+
+        def cohens_d(x, y):
+            nx = len(x)
+            ny = len(y)
+            dof = nx + ny - 2
+            pooled_std = np.sqrt(((nx-1)*np.std(x, ddof=1)**2 + (ny-1)*np.std(y, ddof=1)**2) / dof)
+            return (np.mean(x) - np.mean(y)) / pooled_std
+    
+        st.header("1. Distribuição de nWBV")
+    
+        col1, col2 = st.columns(2)
+        
+        # Gráficos individuais
+        with col1:
+            fig, ax = plt.subplots()
+            sns.histplot(nwbv_doentes_maiores_60['nWBV'], kde=True, color='red', label='CDR > 0')
+            plt.title("Distribuição para Doentes (CDR > 0)")
+            plt.xlabel("nWBV")
+            plt.legend()
+            st.pyplot(fig)
+
+        with col2:
+            fig, ax = plt.subplots()
+            sns.histplot(nwbv_nao_doentes_maiores_60['nWBV'], kde=True, color='green', label='CDR = 0')
+            plt.title("Distribuição para Não Doentes (CDR = 0)")
+            plt.xlabel("nWBV")
+            plt.legend()
+            st.pyplot(fig)
+
+        # Gráfico de comparação - Boxplot
+        st.subheader("Comparação entre Grupos")
+        fig, ax = plt.subplots(figsize=(10, 6))
+
+        # Preparar os dados para comparação
+        nwbv_doentes_maiores_60['Grupo'] = 'CDR > 0'
+        nwbv_nao_doentes_maiores_60['Grupo'] = 'CDR = 0'
+        dados_comparacao = pd.concat([nwbv_doentes_maiores_60, nwbv_nao_doentes_maiores_60])
+
+        # Criar o boxplot
+        sns.boxplot(x='Grupo', y='nWBV', data=dados_comparacao,
+                    hue='Grupo', 
+                    palette={'CDR > 0': 'red', 'CDR = 0': 'green'}, 
+                    order=['CDR > 0', 'CDR = 0'],
+                    legend=False)
+
+        plt.title("Comparação de nWBV entre Doentes e Não Doentes (CDR > 0 vs CDR = 0)")
+        plt.ylabel("Valor de nWBV")
+        plt.xlabel("Grupo")
+        st.pyplot(fig)
+
+
+
+        # Seção 2: Testes de Normalidade
+        st.header("Testes de Normalidade (Shapiro-Wilk)")
+        with st.container():
+    
+            st.write("")  # Espaçamento
+            alpha1 = st.slider("Nível de significância (α)", 
+                            min_value=0.01, 
+                            max_value=0.10, 
+                            value=0.05, 
+                            step=0.01,
+                            help="Nível de significância para os testes estatísticos",
+                            key = "alpha_nwbv")
+    
+        
+        stat_doentes, p_doentes = shapiro(nwbv_doentes_maiores_60['nWBV'])
+        stat_nao_doentes, p_nao_doentes = shapiro(nwbv_nao_doentes_maiores_60['nWBV'])
+        
+        norm_col1, norm_col2 = st.columns(2)
+        
+        with norm_col1:
+            st.metric(label="Doentes (CDR > 0)", 
+                    value=f"p = {p_doentes:.4f}",
+                    help="H₀: Os dados são normalmente distribuídos")
+            st.write("Conclusão:", "Normal" if p_doentes > alpha1 else "Não normal")
+        
+        with norm_col2:
+            st.metric(label="Não Doentes (CDR = 0)", 
+                    value=f"p = {p_nao_doentes:.4f}",
+                    help="H₀: Os dados são normalmente distribuídos")
+            st.write("Conclusão:", "Normal" if p_nao_doentes > alpha1 else "Não normal")
+        
+        # Seção 3: Teste T e Tamanho do Efeito
+        st.header("3. Comparação entre Grupos")
+        
+        t_stat, p_valor = ttest_ind(
+            nwbv_doentes_maiores_60['nWBV'],
+            nwbv_nao_doentes_maiores_60['nWBV'],
+            alternative='less'
+        )
+        
+        d = cohens_d(nwbv_doentes_maiores_60['nWBV'], nwbv_nao_doentes_maiores_60['nWBV'])
+        
+        st.subheader("Teste T para Amostras Independentes")
+        st.write(f"""
+        - **Hipótese nula (H₀):** Não há diferença no nWBV entre os grupos (ou doentes têm nWBV maior/igual)
+        - **Hipótese alternativa (H₁):** Doentes têm nWBV menor (teste unilateral)
+        """)
+        
+        st.metric(label="Valor-p", 
+                value=f"{p_valor:.6f}",
+                delta="Significativo" if p_valor < alpha1 else "Não significativo",
+                delta_color="inverse")
+        
+        st.write(f"**Conclusão:** {'Rejeitamos H₀' if p_valor < alpha1 else 'Não rejeitamos H₀'} a um α = {alpha1}")
+        
+        st.subheader("Tamanho do Efeito (Cohen's d)")
+        
+        effect_size = st.container()
+        with effect_size:
+            col1, col2 = st.columns([1, 3])
+            
+            with col1:
+                st.metric(label="Cohen's d", value=f"{d:.2f}")
+            
+            with col2:
+                st.write("""
+                | Valor | Interpretação |
+                |-------|---------------|
+                | 0.2   | Pequeno       |
+                | 0.5   | Médio         |
+                | 0.8   | Grande        |
+                """)
+                st.write(f"**Interpretação:** {'Grande' if abs(d) >= 0.8 else 'Médio' if abs(d) >= 0.5 else 'Pequeno'} efeito")
+
+
+
     with subtab4:
         
+        st.header("Análise Comparativa de MMSE entre Pacientes com e sem Demência")
+
         col1, col2 = st.columns([2, 1])
         
         with col1:
@@ -337,6 +472,155 @@ with tab3:
                 onde 70% deles apresentaram um CDR = 0 e um 27% apresentaram CDR = 0.5. 
                 E 100% dos pacientes com CDR = 0 obtiveram resultado superior a 23.
                 """)
+
+
+        
+    
+        with st.container():
+            st.write("")  # Espaçamento
+            nivel_significancia  = st.slider("Nível de significância (α)", 
+                    min_value=0.01, 
+                    max_value=0.10, 
+                    value=0.05, 
+                    step=0.01,
+                    help="Nível de significância para os testes estatísticos",
+                    key = "alpha_mmse")
+
+          
+        idade_minima = 60
+
+
+        #  Filtrar os dados
+        mmse_doentes = data.loc[(data['Age'] > idade_minima) & (data['CDR'] > 0), ['MMSE']].reset_index(drop=True)
+        mmse_nao_doentes = data.loc[(data['Age'] > idade_minima) & (data['CDR'] == 0), ['MMSE']].reset_index(drop=True)
+
+        # Layout em colunas
+        col1, col2 = st.columns(2)
+
+        # Coluna 1: Estatísticas Descritivas
+        with col1:
+            # Teste de normalidade
+            st.write("**Teste de Normalidade (Shapiro-Wilk):**")
+            stat_doentes, p_doentes = shapiro(mmse_doentes['MMSE'])
+            stat_nao_doentes, p_nao_doentes = shapiro(mmse_nao_doentes['MMSE'])
+            
+            st.write(f"- Pacientes com CDR > 0: p-valor = {p_doentes:.4f}")
+            st.write(f"- Pacientes com CDR = 0: p-valor = {p_nao_doentes:.4f}")
+            
+            # Interpretação
+            if p_doentes < 0.05 or p_nao_doentes < 0.05:
+                st.warning("Os dados não seguem uma distribuição normal (p < 0.05). Usando teste não paramétrico.")
+            else:
+                st.success("Os dados seguem uma distribuição normal (p ≥ 0.05). Pode-se usar teste paramétrico.")
+
+        # Coluna 2: Testes Estatísticos
+        with col2:
+                    
+            
+            # Teste de Mann-Whitney
+            st.write("\n**Teste de Mann-Whitney U (diferença entre grupos):**")
+            u_stat, p_valor = mannwhitneyu(
+                mmse_doentes['MMSE'],
+                mmse_nao_doentes['MMSE'],
+                alternative='less'
+            )
+            
+            st.write(f"- Estatística U = {u_stat:.2f}")
+            st.write(f"- p-valor = {p_valor:.4f}")
+            
+            # Interpretação do resultado
+            st.write("\n**Interpretação:**")
+            st.write("Hipótese nula (H₀): Não há diferença no MMSE entre os grupos.")
+            st.write("Hipótese alternativa (H₁): Pacientes com demência (CDR>0) têm MMSE menor.")
+            
+            if p_valor < nivel_significancia:
+                st.error(f"Rejeitamos H₀ (p < {nivel_significancia}). Há evidências de que pacientes com demência têm MMSE significativamente menor.")
+            else:
+                st.success(f"Não rejeitamos H₀ (p ≥ {nivel_significancia}). Não há evidências suficientes para afirmar que pacientes com demência têm MMSE menor.")
+
+        # Gráficos
+        st.subheader("Visualização dos Dados")
+
+        mmse_doentes['Grupo'] = 'CDR > 0'
+        mmse_nao_doentes['Grupo'] = 'CDR = 0'
+        dados_comparacao_mmse = pd.concat([mmse_doentes, mmse_nao_doentes])
+
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
+
+        # Boxplot
+        
+        # Criar o boxplot
+        sns.boxplot(x='Grupo', y='MMSE', data=dados_comparacao_mmse,
+                    hue='Grupo', 
+                    palette={'CDR > 0': 'red', 'CDR = 0': 'green'}, 
+                    order=['CDR > 0', 'CDR = 0'],
+                    ax=ax1,
+                    legend=False)
+        
+        ax1.set_xticks([0, 1])  # Explicitly set ticks before labels
+        ax1.set_xticklabels(['CDR > 0', 'CDR = 0'])  # Fixed order to match the boxplot
+        ax1.set_title('Distribuição de MMSE entre Doentes e Não Doentes')
+        ax1.set_ylabel('Pontuação MMSE')
+        ax1.set_xlabel('Grupo')
+        
+
+        # Histograma
+        sns.histplot(mmse_nao_doentes['MMSE'], color='skyblue', label='CDR = 0', 
+                    kde=True, ax=ax2, alpha=0.5)
+        sns.histplot(mmse_doentes['MMSE'], color='salmon', label='CDR > 0', 
+                    kde=True, ax=ax2, alpha=0.5)
+        ax2.set_xlabel('Pontuação MMSE')
+        ax2.set_ylabel('Frequência')
+        ax2.set_title('Distribuição de MMSE')
+        ax2.legend()
+
+        st.pyplot(fig)
+
+        # Informações adicionais
+        with st.expander("Sobre esta análise"):
+            st.write("""
+            **Metodologia:**
+            - Comparação de pontuações MMSE entre pacientes com e sem demência (CDR > 0 vs CDR = 0)
+            - Teste de Shapiro-Wilk para verificar normalidade dos dados
+            - Teste U de Mann-Whitney (não paramétrico) para comparar os grupos
+            
+            **MMSE (Mini-Mental State Examination):**
+            - Avaliação cognitiva com pontuação de 0 a 30
+            - Pontuações mais baixas indicam maior comprometimento cognitivo
+            
+            **CDR (Clinical Dementia Rating):**
+            - 0: Sem demência
+            - 0.5: Demência questionável
+            - 1: Demência leve
+            - 2: Demência moderada
+            """)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 with tab4:
       st.subheader("Conclusões")
 
@@ -444,3 +728,122 @@ with tab_pca:
     # Exibir visualizações
     st.pyplot(plot_3d_scatter(cluster_pca_df))
     st.pyplot(plot_boxplots(dados_pca, cluster_pca_df))
+
+
+with tab_simulacao:
+
+    # Função para carregar e preprocessar os dados de simulação
+    @st.cache_data
+    def load_data_simulacao():
+        data = pd.read_csv('arquivos/oasis_cross-sectional.csv')
+        data = data.dropna(subset=['MMSE', 'CDR']).drop('Delay', axis=1)
+        return data
+
+    # Função para preparar as tabelas de distribuição de CDR por faixa etária
+    def preprocess_cdr_tables(data_simulacao):
+        data_simulacao_idades_cdr = data_simulacao[['Age', 'CDR']].dropna().reset_index(drop=True)
+
+        # Filtrar apenas idades 65+
+        data_65_plus = data_simulacao_idades_cdr[data_simulacao_idades_cdr['Age'] >= 65].copy()
+
+        # Criar faixas etárias
+        bins_65_plus = [65, 70, 75, 80, 85, 90, float('inf')]
+        labels_65_plus = ['65-69', '70-74', '75-79', '80-84', '85-89', '90+']
+        data_65_plus['faixa_etaria'] = pd.cut(data_65_plus['Age'], bins=bins_65_plus, labels=labels_65_plus, right=False)
+
+        # Criar tabela agrupada por faixa etária e CDR
+        cdr_faixa_table = data_65_plus.groupby(['faixa_etaria', 'CDR'], observed=True).size().reset_index(name='Count')
+        cdr_faixa_table = cdr_faixa_table.pivot(index='faixa_etaria', columns='CDR', values='Count').fillna(0)
+
+        # Filtrar idades >= 60 e CDR > 0
+        data_cdr_pos = data_simulacao_idades_cdr[(data_simulacao_idades_cdr['Age'] >= 60) & (data_simulacao_idades_cdr['CDR'] > 0)].copy()
+
+        # Criar faixas etárias ajustadas
+        bins_cdr_pos = [60, 70, 80, 90, float('inf')]
+        labels_cdr_pos = ['60-69', '70-79', '80-89', '90+']
+        data_cdr_pos['faixa_etaria'] = pd.cut(data_cdr_pos['Age'], bins=bins_cdr_pos, labels=labels_cdr_pos, right=False)
+
+        # Criar tabela de porcentagem por faixa etária e CDR
+        cdr_faixa_count = data_cdr_pos.groupby(['faixa_etaria', 'CDR'], observed=True).size().reset_index(name='Count')
+        total_por_faixa = cdr_faixa_count.groupby('faixa_etaria', observed=True)['Count'].transform('sum')
+        cdr_faixa_count['Percent'] = (cdr_faixa_count['Count'] / total_por_faixa) * 100
+        cdr_faixa_percent_table = cdr_faixa_count.pivot(index='faixa_etaria', columns='CDR', values='Percent').fillna(0)
+
+        return cdr_faixa_table, cdr_faixa_percent_table
+
+    # Função para calcular a projeção de Alzheimer
+    def calcular_projecao_alzheimer():
+        populacao_df = pd.read_csv("arquivos/populacao_idosos_2024_2040.csv")
+        alzheimer_df = pd.read_csv("arquivos/alzheimer_por_faixa_etaria.csv")
+
+        populacao_long = populacao_df.melt(id_vars="faixa_etaria", var_name="Ano", value_name="Populacao")
+        populacao_long = populacao_long.merge(alzheimer_df, on="faixa_etaria")
+        populacao_long["Alzheimer_Projecao"] = populacao_long["Populacao"] * (populacao_long["Alzheimer (%)"] / 100)
+        populacao_long["Ano"] = populacao_long["Ano"].astype(int)
+
+        return populacao_long
+
+    # Função para visualizar projeção de Alzheimer
+    def plot_alzheimer_projection(populacao_long):
+        plt.figure(figsize=(12, 6))
+        sns.lineplot(data=populacao_long, x="Ano", y="Alzheimer_Projecao", hue="faixa_etaria", marker="o")
+        plt.title("Projeção de Pessoas com Alzheimer por Faixa Etária (2024–2040)")
+        plt.xlabel("Ano")
+        plt.ylabel("Número Estimado de Pessoas com Alzheimer")
+        plt.legend(title="Faixa Etária", bbox_to_anchor=(1.05, 1), loc='upper left')
+        plt.tight_layout()
+        st.pyplot(plt)
+
+    # Função para calcular projeção por CDR
+    def calcular_projecao_cdr(populacao_long, cdr_faixa_percent_table):
+        alz_idade_ano = populacao_long[['Ano', 'faixa_etaria', 'Alzheimer_Projecao']].copy()
+
+        alz_idade_ano["faixa_etaria_ajustada"] = alz_idade_ano["faixa_etaria"].replace({
+            "65-69": "60-69", "70-74": "70-79", "75-79": "70-79",
+            "80-84": "80-89", "85-89": "80-89", "90+": "90+"
+        })
+
+        df_final = alz_idade_ano.merge(cdr_faixa_percent_table, left_on="faixa_etaria_ajustada", right_on="faixa_etaria", how="left")
+
+        for cdr in [0.5, 1.0, 2.0]:
+            df_final[f"CDR {cdr} Projecao"] = (df_final["Alzheimer_Projecao"] * (df_final[cdr] / 100)).round(0).astype(int)
+
+        df_agrupado = df_final.groupby("Ano")[["CDR 0.5 Projecao", "CDR 1.0 Projecao", "CDR 2.0 Projecao"]].sum()
+        
+        return df_agrupado
+
+    # Função para visualizar projeção por CDR
+    def plot_cdr_projection(df_agrupado):
+        plt.figure(figsize=(10, 5))
+        for col in ["CDR 0.5 Projecao", "CDR 1.0 Projecao", "CDR 2.0 Projecao"]:
+            plt.plot(df_agrupado.index, df_agrupado[col], label=col)
+
+        plt.xlabel("Ano")
+        plt.ylabel("Quantidade de Casos")
+        plt.title("Evolução do número de casos de Alzheimer por gravidade")
+        plt.legend()
+        plt.grid()
+        st.pyplot(plt)
+
+    # Configuração do Streamlit
+    st.title("Dashboard de Análise de Alzheimer")
+
+    data_simulacao = load_data_simulacao()
+    cdr_faixa_table, cdr_faixa_percent_table = preprocess_cdr_tables(data_simulacao)
+    populacao_long = calcular_projecao_alzheimer()
+    df_agrupado = calcular_projecao_cdr(populacao_long, cdr_faixa_percent_table)
+
+    # Exibir o gráfico principal ocupando toda a largura
+    st.subheader("Projeção de Pessoas com Alzheimer")
+    plot_alzheimer_projection(populacao_long)
+
+    # Criar duas colunas abaixo do gráfico principal
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.subheader("Evolução do Número de Casos por Gravidade")
+        plot_cdr_projection(df_agrupado)
+
+    with col2:
+        st.subheader("Tabela de Projeção por CDR")
+        st.write(df_agrupado)
