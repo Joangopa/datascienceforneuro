@@ -5,6 +5,15 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
 
+import joblib
+
+from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans
+
+
+
+
+
 
 # Configuração inicial da página
 st.set_page_config(
@@ -28,11 +37,11 @@ st.markdown(
 @st.cache_data
 def load_data():
     data = pd.read_csv('arquivos/oasis_cross-sectional.csv')
-    # Filtrar os dados onde MMSE e CDR não são nulos
     data = data.dropna(subset=['MMSE', 'CDR'])
     data.drop('Delay', axis=1, inplace=True)
     return data
 
+data = load_data()
 
 @st.cache_data
 def load_data2():
@@ -48,11 +57,15 @@ data2 = load_data2()
 
 
 
-data = load_data()
+
+
+
 
 
 # Criando as abas
-title, tab1,  estudo, tab2, tab3, tab4 = st.tabs(["-", "📌 Introdução ao Problema", "Estudo",  "📊 Introdução aos Dados", "📈 Análises", "Conclusões"])
+title, tab1,  estudo, tab2, tab3, tab4, tab_pred, tab_pca = st.tabs(["-", "📌 Introdução ao Problema", "Estudo",  
+                                                  "📊 Introdução aos Dados", "📈 Análises", "Conclusões",
+                                                  "Predições", "PCA e Agrupamento"])
 
 with title:
     st.markdown(
@@ -335,3 +348,99 @@ with tab4:
 
                 - Exames de imagem são recomendados para fornecer uma conclusão após os resultados do MMSE.
                 """)
+
+with tab_pred:
+    # Carregar o modelo salvo
+    model = joblib.load('decision_tree_model.pkl')
+
+    # Título do app
+    st.title("Classificação de Demência (CDR)")
+
+    st.subheader("Preencha os dados do paciente:")
+
+    # Layout em duas colunas
+    col1, col2 = st.columns(2)
+
+    with col1:
+        gender = st.selectbox("Sexo (M/F)", ['M', 'F'])
+        educ = st.selectbox("Nível educacional", [1, 2, 3, 4, 5])
+        age = st.number_input("Idade", min_value=0, max_value=120, value=75)
+        etiv = st.number_input("Volume Total Intracraniano Estimado", value=1500.0)
+
+    with col2:
+        ses = st.selectbox("Status socioeconômico", [1, 2, 3, 4, 5])
+        mmse = st.number_input("Mini-Exame do Estado Mental", min_value=0, max_value=30, value=28)
+        nwbv = st.number_input("Volume Normalizado de Matéria Branca", value=0.75)
+
+    # Montar DataFrame com os dados inseridos
+    input_df = pd.DataFrame({
+        'M/F': [gender],
+        'Educ': [educ],
+        'SES': [ses],
+        'Age': [age],
+        'MMSE': [mmse],
+        'eTIV': [etiv],
+        'nWBV': [nwbv]
+    })
+
+    # Botão para acionar a previsão
+    if st.button("Classificar"):
+        prediction = model.predict(input_df)
+        proba = model.predict_proba(input_df)
+        st.success(f"Resultado previsto (CDR): {prediction[0]}")
+
+with tab_pca:
+
+    def preprocess_data(data):
+        dados_pca = data[['M/F', 'Age', 'MMSE', 'ASF', 'nWBV', 'CDR']].copy()
+        dados_pca['M/F'] = dados_pca['M/F'].map({'M': 0, 'F': 1})
+        return dados_pca
+    
+    # Aplicar PCA
+    def apply_pca(dados_pca):
+        dados_normalizados = (dados_pca - dados_pca.mean()) / dados_pca.std()
+        pca_3d = PCA(n_components=3)
+        pca_resultado = pca_3d.fit_transform(dados_normalizados)
+        return pd.DataFrame(data=pca_resultado, columns=['PC1', 'PC2', 'PC3'])
+
+    # Aplicar KMeans
+    def apply_kmeans(pca_df, n_clusters=4):
+        kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+        labels = kmeans.fit_predict(pca_df)
+        pca_df['Cluster'] = labels
+        return pca_df
+
+    # Função para criar gráficos
+    def plot_3d_scatter(pca_df):
+        fig = plt.figure(figsize=(10, 7))
+        ax = fig.add_subplot(111, projection='3d')
+        ax.scatter(pca_df['PC1'], pca_df['PC2'], pca_df['PC3'], s=50, alpha=0.6, c=pca_df['Cluster'])
+        ax.set_xlabel('PC1')
+        ax.set_ylabel('PC2')
+        ax.set_zlabel('PC3')
+        ax.set_title('PCA - Visualização 3D')
+        return fig
+
+    def plot_boxplots(dados_pca, pca_df):
+        colunas = ['Age', 'MMSE', 'ASF', 'nWBV', 'CDR']
+        fig, axes = plt.subplots(nrows=2, ncols=3, figsize=(20, 10))
+        axes = axes.flatten()
+        dados_pca['Cluster'] = pca_df['Cluster'].values
+        for i, coluna in enumerate(colunas):
+            sns.boxplot(x='Cluster', y=coluna, data=dados_pca, ax=axes[i])
+            axes[i].set_title(f'Distribuição de {coluna} por Cluster')
+        plt.tight_layout()
+        return fig
+
+    st.title("Dashboard PCA e KMeans")
+
+    st.subheader("Análise de Componentes Principais (PCA) e KMeans")
+
+    data_pca = load_data()
+    dados_pca = preprocess_data(data_pca)
+    pca_df = apply_pca(dados_pca)
+    cluster_pca_df = apply_kmeans(pca_df)
+
+    # Exibir visualizações
+    st.pyplot(plot_3d_scatter(cluster_pca_df))
+    st.pyplot(plot_boxplots(dados_pca, cluster_pca_df))

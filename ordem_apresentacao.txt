@@ -1,0 +1,24 @@
+1. Introdução ao Problema
+1.1 Publico alvo
+1.2 Pergunta a responder
+
+2. Introdução aos dados
+2.1 Origem dos dados
+2.2 Descripçao das variaveis
+2.3 Tratamento de dados faltantes
+
+3. EDA
+3.1 Analises graficas
+3.2 Testes normalidade
+3.2 Correlações
+3.3 Testes Estatísticos
+
+4. Predições
+- determinar valor do CDR a partir das outras varaiveis
+
+5. PCA's
+5.1 Explicação grafica das PCA's
+
+6. Agrupamentos
+
+7. Simulação
