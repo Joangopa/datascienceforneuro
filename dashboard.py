@@ -549,7 +549,7 @@ with tab_analises:
             fig_box.update_layout(showlegend=False)
             st.plotly_chart(fig_box, use_container_width=True)
         
-        
+         
         st.subheader("Análise Estatística")
         
         # Configuração do teste
