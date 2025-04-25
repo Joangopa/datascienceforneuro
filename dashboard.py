@@ -424,63 +424,85 @@ with tab_analises:
 
         # Coluna 1 - Teste T
         with col_t:
-            st.subheader("Teste T para Amostras Independentes")
-            
-            with st.expander("Hipóteses", expanded=True):
-                st.markdown("""
-                - **H₀ (Nula):** μ₁ ≥ μ₂ (Doentes têm nWBV maior/igual)
-                - **H₁ (Alternativa):** μ₁ < μ₂ (Doentes têm nWBV menor)
-                """)
-            
-            st.markdown(f"""
-            **Resultados:**
-            - Estatística t = `{t_stat:.4f}`
-            - Graus de liberdade = `{len(nwbv_doentes_maiores_60) + len(nwbv_nao_doentes_maiores_60) - 2}`
-            """)
-            
-            st.metric(label="Valor-p", 
-                    value=f"{p_valor:.4f}",
-                    delta="Significativo" if p_valor < alpha1 else "Não significativo",
-                    delta_color="inverse")
-            
-            st.markdown(f"""
-            ### Conclusão do Teste T
-            {'✅ **Rejeitamos H₀** (p < α)' if p_valor < alpha1 else '❌ **Não rejeitamos H₀** (p ≥ α)'}  
-            α = {alpha1}
-            """)
+            with st.container(border=True):  # Adiciona um quadro ao redor de col_t
+                st.subheader("Teste T para Amostras Independentes")
 
-        # Coluna 2 - Tamanho do Efeito
+                with st.expander("Hipóteses", expanded=True):
+                    st.markdown("""
+                    - **H₀ (Nula):** μ₁ ≥ μ₂ (Doentes têm nWBV maior/igual)
+                    - **H₁ (Alternativa):** μ₁ < μ₂ (Doentes têm nWBV menor)
+                    """)
+
+                col_esq, col_dir = st.columns(2)
+
+                # Coluna da esquerda
+                with col_esq:
+                    st.markdown(f"""
+                    **Resultados:**
+                    - Estatística t = `{t_stat:.4f}`
+                    - Graus de liberdade = `{len(nwbv_doentes_maiores_60) + len(nwbv_nao_doentes_maiores_60) - 2}`
+                    """)
+
+                # Coluna da direita
+                with col_dir:
+                    st.metric(label="Valor-p", 
+                            value=f"{p_valor:.4f}",
+                            delta="Significativo" if p_valor < alpha1 else "Não significativo",
+                            delta_color="inverse")
+
+                st.markdown(f"""
+                ### Conclusão do Teste T
+                {'✅ **Rejeitamos H₀** (p < α)' if p_valor < alpha1 else '❌ **Não rejeitamos H₀** (p ≥ α)'}
+                α = {alpha1}
+                """)
+
         with col_d:
-            st.subheader("Tamanho do Efeito (Cohen's d)")
-            
-            st.markdown(f"""
-            **Valor calculado:**  
-            `d = {d:.2f}`
-            """)
-            
-            st.markdown("""
-            **Escala de referência:**
-            | d    | Interpretação |
-            |------|---------------|
-            | 0.2  | Pequeno       |
-            | 0.5  | Médio         |
-            | 0.8  | Grande        |
-            """)
-            
-            # Determinar interpretação
-            abs_d = abs(d)
-            if abs_d >= 0.8:
-                interpretacao = "**Grande efeito** 🟠"
-            elif abs_d >= 0.5:
-                interpretacao = "**Médio efeito** 🟡"
-            else:
-                interpretacao = "**Pequeno efeito** 🟢"
-            
-            st.markdown(f"""
-            ### Interpretação
-            {interpretacao}  
-            Direção: {'Negativo' if d < 0 else 'Positivo'}
-            """)
+            with st.container(border=True):  # Adiciona um quadro ao redor de col_d
+                # Criando duas colunas: esquerda para valores e interpretação, direita para tabela de referência
+                col_esq, col_dir = st.columns(2)
+
+                # Coluna da esquerda
+                with col_esq:
+                    st.subheader("Tamanho do Efeito (Cohen's d)")
+
+                    # Aumentando a fonte do valor calculado com HTML
+                    st.markdown(f"""
+                    <style>
+                        .valor-calculado {{
+                            font-size: 30px;
+                            font-weight: bold;
+                            color: #e41a1c;  /* Vermelho intermediário */
+                        }}
+                    </style>
+                    **Valor calculado:**  
+                    <p class="valor-calculado">d = {d:.2f}</p>
+                    """, unsafe_allow_html=True)
+
+                    # Determinar interpretação
+                    abs_d = abs(d)
+                    if abs_d >= 0.8:
+                        interpretacao = "**Grande efeito** 🟠"
+                    elif abs_d >= 0.5:
+                        interpretacao = "**Médio efeito** 🟡"
+                    else:
+                        interpretacao = "**Pequeno efeito** 🟢"
+
+                    st.markdown(f"""
+                    ### Interpretação  
+                    {interpretacao}  
+                    **Direção:** {'Negativo' if d < 0 else 'Positivo'}
+                    """)
+
+                # Coluna da direita - Tabela de referência
+                with col_dir:
+                    st.markdown("""
+                    **Escala de referência:**  
+                    | d    | Interpretação |
+                    |------|---------------|
+                    | 0.2  | Pequeno       |
+                    | 0.5  | Médio         |
+                    | 0.8  | Grande        |
+                    """)
 
 
     with subtab4:
@@ -867,14 +889,24 @@ with tab_simulacao:
         return populacao_long
 
     # Função para visualizar projeção de Alzheimer
+
+
     def plot_alzheimer_projection(populacao_long):
         plt.figure(figsize=(12, 6))
-        sns.lineplot(data=populacao_long, x="Ano", y="Alzheimer_Projecao", hue="faixa_etaria", marker="o")
+
+        # Especificando a paleta de cores apenas para esse gráfico
+        palette = sns.color_palette("dark")  # Troque "magma" por outra paleta se quiser
+
+        # Criando o gráfico sem alterar as configurações globais
+        sns.lineplot(data=populacao_long, x="Ano", y="Alzheimer_Projecao", hue="faixa_etaria", 
+                    marker="o", palette=palette)
+
         plt.title("Projeção de Pessoas com Alzheimer por Faixa Etária (2024–2040)")
         plt.xlabel("Ano")
         plt.ylabel("Número Estimado de Pessoas com Alzheimer")
         plt.legend(title="Faixa Etária", bbox_to_anchor=(1.05, 1), loc='upper left')
         plt.tight_layout()
+
         st.pyplot(plt)
 
     # Função para calcular projeção por CDR
@@ -897,15 +929,30 @@ with tab_simulacao:
 
     # Função para visualizar projeção por CDR
     def plot_cdr_projection(df_agrupado):
-        plt.figure(figsize=(10, 5))
-        for col in ["CDR 0.5 Projecao", "CDR 1.0 Projecao", "CDR 2.0 Projecao"]:
-            plt.plot(df_agrupado.index, df_agrupado[col], label=col)
+        # Definindo as cores personalizadas para cada categoria
+        cores = {
+            "CDR 0.5 Projecao": '#ff9999',  # Vermelho leve
+            "CDR 1.0 Projecao": '#e41a1c',  # Vermelho intermediário
+            "CDR 2.0 Projecao": '#990000'   # Vermelho intenso
+        }
 
+        # Criando a figura
+        plt.figure(figsize=(10, 5))
+
+        # Plotando cada linha com a cor correspondente
+        for col in cores.keys():
+            plt.plot(df_agrupado.index, df_agrupado[col], label=col, color=cores[col], linewidth=2)
+
+        # Adicionando os rótulos e título
         plt.xlabel("Ano")
         plt.ylabel("Quantidade de Casos")
         plt.title("Evolução do número de casos de Alzheimer por gravidade")
+
+        # Exibindo a legenda e grid
         plt.legend()
         plt.grid()
+
+        # Renderizando o gráfico no Streamlit
         st.pyplot(plt)
 
     # Configuração do Streamlit
@@ -945,7 +992,7 @@ with tab_simulacao:
         plot_cdr_projection(df_agrupado)
 
     with col2:
-        st.subheader("Tabela de Projeção por CDR")
+        st.subheader("Tabela de Projeção por Demência Clinica") 
         st.write(df_agrupado)
 
 
