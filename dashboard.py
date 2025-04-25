@@ -27,7 +27,7 @@ st.markdown(
     """
     <style>
         .stApp {
-            background-color: #f0f0f0;  /* Cor de fundo cinza claro */
+            background-color: #e6f2ff;  /* Cor de fundo cinza claro */
         }
     </style>
     """, 
@@ -64,8 +64,8 @@ data2 = load_data2()
 
 
 # Criando as abas
-tab_title, tab_intro_problema,  tab_estudo, tab_intro_dados, tab_analises, tab_pred, tab_pca, tab_simulacao, tab_conclusoes = st.tabs(["-", "📌 Introdução ao Problema", "Estudo",  
-                                                  "📊 Introdução aos Dados", "📈 Análises",
+tab_title, tab_intro_problema,  tab_estudo, tab_analises, tab_pred, tab_pca, tab_simulacao, tab_conclusoes = st.tabs(["-", "📌 Introdução ao Problema", "Estudo",  
+                                                   "📈 Análises",
                                                   "Predições", "PCA e Agrupamento", "Simulações",
                                                   "Conclusões"])
 
@@ -92,30 +92,33 @@ with tab_intro_problema:
         
         # st.subheader("Introdução ao Problema")
         with st.container(border=True):  
-            st.write("""
-                    - A doença de Alzheimer é uma doença cerebral degenerativa sem cura
-                    - É caracterizada por atrofia progressiva do córtex cerebral
-                    - Causa perda de memória, aumento dos déficits cognitivos e potencial perda das funções motoras
-                    - Com um diagnóstico precoce, a progressão pode ser retardada e os sintomas tratados.
-            """)
+            sinais = [
+            "📉 **Perda de memória** – Esquecimento frequente de informações recentes.",
+            "👜 **Perder pertences ou deixar objetos em lugares inusitados** – Como colocar chaves na geladeira.",
+            "🛠️ **Dificuldade em realizar tarefas cotidianas** – Como cozinhar, dirigir ou pagar contas.",
+            "🧭 **Desorientação no espaço e no tempo** – Perder-se em lugares conhecidos.",
+            "🧩 **Dificuldade no planejamento e resolução de problemas** – Como seguir uma receita simples.",
+            "⚖️ **Tomada de decisões inadequadas** – Como confiar em pessoas erradas ou gastar muito dinheiro.",
+            "🗣️ **Dificuldade de expressar e compreender a língua** – Esquecer palavras ou repetir frases.",
+            "👀 **Problemas de atenção, concentração e percepção** – Dificuldade para manter o foco."
+        ]
 
-            # Criando três colunas: esquerda, centralizada e direita
-        col_empty1, col_img, col_empty2 = st.columns([1, 2, 3])
+        for sinal in sinais:
+            st.markdown(f"- {sinal}")
 
-        with col_img:
-            st.image("brain_atrophy.jpg", caption="Atrofia Cerebral", width=400)
-        
+           
     with col2:  
         # Você pode adicionar imagens, gráficos ou outros elementos
         
-        st.image("sinais-de-alzheimer.jpg", caption="Sinais de Alzheimer", width=500)
+        st.image("brain.png", caption="Atrofia Cerebral", width=400)
 
 
 with tab_estudo: 
+    col1, col2 = st.columns([1, 1])
 
-    st.subheader("Descrição da coleta dos dados:")
-
-    with st.container(border=True):  # Disponível no Streamlit >= 1.29.0
+    with col1:
+        st.subheader("Descrição dos dados:")
+        with st.container(border=True):
             st.write("""
                     - 416 pessoas participaram do estudo;
                     - Idades entre 18 e 96 anos;
@@ -124,68 +127,45 @@ with tab_estudo:
                     - Inclui homens e mulheres;
                     - Um conjunto de dados de confiabilidade é incluído contendo 20 sujeitos não dementes fotografados em uma visita subsequente dentro de 90 dias de sua sessão inicial.
             """)
-
-with tab_intro_dados:
-
+        st.subheader("Tratamento dos dados:")
+        with st.container(border=True):
+            st.write("""
+                    - Os dados foram filtrados para incluir apenas aqueles com pontuação MMSE e CDR não nulas;
+                    - As colunas de dados irrelevantes foram removidas;
+                    - Dos 416 dados originais, 235 foram mantidos após o pré-processamento.
+                    - Os dados que foram removidos pertencem a pessoas com idades abaixo de 59 anos
+            """)
     
-    # st.header("Introdução aos Dados")
-    
-    # Criando duas colunas (a primeira será mais larga para a imagem)
-    col1, col2 = st.columns([1, 1])  # Proporção 2:3 (ajuste conforme necessário)
-    
-    
-
-    with col1:
-        info_variaveis_ = {
-            "Variável": ["ID", "M/F", "Mão", "Idade", "Educ", "NSE", "eTIV", "ASF", "nWBV", "MMSE", "CDR"],
-            "Definição": [
-                "Identificação", "Gênero", "Mão Dominante", "Idade em anos", 
-                "Nível de Educação", "Nível Socioeconômico", 
-                "Volume Intracraniano Total Estimado",
-                "Fator de Escala Atlas",
-                "Volume Cerebral Total Normalizado",
-                "Mini Exame do Estado Mental",  
-                "Escala Clínica de Demência"
-            ],
-            "Valores": [
-                " ", "M = Masculino, F = Feminino", "R = Direita, L = Esquerda", " ", 
-                "1 = < Ensino Médio\n2 = Ensino Médio Completo\n3 = Ensino Superior Incompleto\n4 = Ensino Superior Completo\n5 = Pós-Graduação",
-                "1 = Classe Baixa\n2 = Classe Média Baixa\n3 = Classe Média\n4 = Classe Média Alta\n5 = Classe Alta",
-                " ", " ", " ", " 0 - 30 ", 
-                "0 = Sem Demência\n0.5 = Demência Muito Leve\n1 = Demência Leve\n2 = Demência Moderada",
-            ]
-        }
-        info_variaveis = pd.DataFrame(info_variaveis_)
-        st.subheader("Tabela de Variáveis")
-        # st.dataframe(info_variaveis, use_container_width=True,hide_index=True)
-        st.markdown(
-            """
-            <style>
-            table {
-                width: 80%;
-                
-            }
-            th {
-                color: #0073e6 !important; /* Força a mudança da cor */
-                font-weight: bold; /* Deixa o texto em negrito */
-                white-space: nowrap; /* Mantém o texto em uma linha */
-                border: 1px solid black !important;
-            }
-            td {
-                white-space: pre-wrap;
-                border: 1px solid black !important;
-            }
-            </style>
-            """,
-            unsafe_allow_html=True
-            )
-        
-        st.table(info_variaveis)  
-
     with col2:
-        st.subheader("Exemplo de Mini Mental State Examination")
+        st.subheader("📊 Variáveis do Conjunto de Dados")
+        
+        # Container para as variáveis
+        with st.container(border=True):
+            variaveis = {
+                "ID": "Identificação",
+                "M/F": "M = Masculino, F = Feminino",
+                "Mão": "Mão Dominante",
+                "Idade": "Idade em anos",
+                "Educ": "Nível de Educação, de 1 a 5",
+                "NSE": "Nível Socioeconômico, de 1 a 5",
+                "eTIV": "Volume Intracraniano Total Estimado",
+                "ASF": "Fator de Escala Atlas",
+                "nWBV": "Volume Cerebral Total Normalizado",
+                "MMSE": "Mini Exame do Estado Mental – escala de 0 a 30",
+                "CDR": "Escala Clínica de Demência. 0 = Sem Demência, 0.5 = Demência Muito Leve, 1 = Demência Leve, 2 = Demência Moderada"
+            }
 
-        st.image("mmse.jpg", use_container_width=False, width=800)
+            for var, desc in variaveis.items():
+                st.markdown(f"**{var}**: {desc}")
+        
+        # Botão para mostrar/ocultar a imagem
+        if st.button('MMSE'):
+            if 'show_image' not in st.session_state:
+                st.session_state.show_image = False
+            st.session_state.show_image = not st.session_state.show_image
+        
+        if st.session_state.get('show_image', False):
+            st.image("mmse.jpg", use_container_width =True)
 
 with tab_analises:
     
@@ -311,15 +291,16 @@ with tab_analises:
         st.title("Análise Estatística de nWBV entre Pacientes com e sem Demência")
 
         fig2 = px.scatter(
-        data,
-        x='Age',
-        y='nWBV',
-        color='CDR',
-        hover_name='ID',
-        title='Volume Cerebral Normalizado por Idade e CDR',
-        labels={'Age': 'Idade', 'nWBV': 'Volume Cerebral Normalizado', 'CDR': 'CDR'},
-        color_discrete_sequence=['#4daf4a', '#ff9999', '#e41a1c', '#990000']  
-    )
+            data2,
+            x='Age',
+            y='nWBV',
+            color='CDR',
+            size='eTIV',
+            hover_name='ID',
+            title='Volume Cerebral Normalizado por Idade e CDR',
+            labels={'Age': 'Idade', 'nWBV': 'Volume Cerebral Normalizado', 'CDR': 'CDR'},
+            color_discrete_sequence=['#4daf4a', '#ff9999', '#e41a1c', '#990000']  
+        )
         st.plotly_chart(fig2, use_container_width=True)
 
         nwbv_doentes_maiores_60 = data.loc[(data['Age'] > 60) & (data['CDR'] >0), ['nWBV']].reset_index(drop=True)
@@ -658,41 +639,59 @@ with tab_pred:
     # Título do app
     st.title("Classificação de Demência (CDR)")
 
-    st.subheader("Preencha os dados do paciente:")
+    st.markdown(
+        """
+        <style>
+        .stFrame {
+            border: 2px solid #f63366;
+            border-radius: 5px;
+            padding: 20px;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
-    # Layout em duas colunas
-    col1, col2 = st.columns(2)
+    with st.container():
 
-    with col1:
-        gender = st.selectbox("Sexo (M/F)", ['M', 'F'])
-        educ = st.selectbox("Nível educacional", [1, 2, 3, 4, 5])
-        age = st.number_input("Idade", min_value=0, max_value=120, value=75)
-        etiv = st.number_input("Volume Total Intracraniano Estimado", value=1500.0)
+            st.markdown('<div class="stFrame">', unsafe_allow_html=True)
 
-    with col2:
-        ses = st.selectbox("Status socioeconômico", [1, 2, 3, 4, 5])
-        mmse = st.number_input("Mini-Exame do Estado Mental", min_value=0, max_value=30, value=28)
-        nwbv = st.number_input("Volume Normalizado de Matéria Branca", value=0.75)
+            st.subheader("Preencha os dados do paciente:")
 
-    # Montar DataFrame com os dados inseridos
-    input_df = pd.DataFrame({
-        'M/F': [gender],
-        'Educ': [educ],
-        'SES': [ses],
-        'Age': [age],
-        'MMSE': [mmse],
-        'eTIV': [etiv],
-        'nWBV': [nwbv]
-    })
+            # Layout em duas colunas
+            col1, col2 = st.columns(2)
 
-    # Botão para acionar a previsão
-    if st.button("Classificar"):
-        prediction = model.predict(input_df)
-        proba = model.predict_proba(input_df)
-        st.success(f"Resultado previsto (CDR): {prediction[0]}")
+            with col1:
+                gender = st.selectbox("Sexo (M/F)", ['M', 'F'])
+                educ = st.selectbox("Nível educacional", [1, 2, 3, 4, 5])
+                age = st.number_input("Idade", min_value=0, max_value=120, value=75)
+                etiv = st.number_input("Volume Total Intracraniano Estimado (1100 - 2000)", value=1500.0)
+
+            with col2:
+                ses = st.selectbox("Status socioeconômico", [1, 2, 3, 4, 5])
+                mmse = st.number_input("Mini-Exame do Estado Mental (0-30) ", min_value=0, max_value=30, value=28)
+                nwbv = st.number_input("Volume Normalizado de Matéria Branca (0,63 - 0,85)", value=0.75)
+
+            # Montar DataFrame com os dados inseridos
+            input_df = pd.DataFrame({
+                'M/F': [gender],
+                'Educ': [educ],
+                'SES': [ses],
+                'Age': [age],
+                'MMSE': [mmse],
+                'eTIV': [etiv],
+                'nWBV': [nwbv]
+            })
+
+            # Botão para acionar a previsão
+            if st.button("Classificar"):
+                prediction = model.predict(input_df)
+                proba = model.predict_proba(input_df)
+                st.success(f"Resultado previsto (CDR): {prediction[0]}")
+
+            st.markdown('</div>', unsafe_allow_html=True)
 
 with tab_pca:
-
     def preprocess_data(data):
         dados_pca = data[['M/F', 'Age', 'MMSE', 'ASF', 'nWBV', 'CDR']].copy()
         dados_pca['M/F'] = dados_pca['M/F'].map({'M': 0, 'F': 1})
@@ -714,38 +713,104 @@ with tab_pca:
 
     # Função para criar gráficos
     def plot_3d_scatter(pca_df):
-        fig = plt.figure(figsize=(10, 7))
+        fig = plt.figure(figsize=(6, 4))
         ax = fig.add_subplot(111, projection='3d')
-        ax.scatter(pca_df['PC1'], pca_df['PC2'], pca_df['PC3'], s=50, alpha=0.6, c=pca_df['Cluster'])
+
+        # Ordena os grupos para manter a consistência de cores
+        grupos = sorted(pca_df['Cluster'].unique())
+
+        cmap = plt.get_cmap("viridis")
+        cores = {grupo: cmap(i / len(grupos)) for i, grupo in enumerate(grupos)}
+
+        for grupo in grupos:
+            subset = pca_df[pca_df['Cluster'] == grupo]
+            ax.scatter(subset['PC1'], subset['PC2'], subset['PC3'], 
+                    s=50, alpha=0.6, color=cores[grupo], label=f"Grupo {grupo}")
+
         ax.set_xlabel('PC1')
         ax.set_ylabel('PC2')
         ax.set_zlabel('PC3')
         ax.set_title('PCA - Visualização 3D')
+        ax.legend()
         return fig
 
-    def plot_boxplots(dados_pca, pca_df):
-        colunas = ['Age', 'MMSE', 'ASF', 'nWBV', 'CDR']
-        fig, axes = plt.subplots(nrows=2, ncols=3, figsize=(20, 10))
-        axes = axes.flatten()
-        dados_pca['Cluster'] = pca_df['Cluster'].values
-        for i, coluna in enumerate(colunas):
-            sns.boxplot(x='Cluster', y=coluna, data=dados_pca, ax=axes[i])
-            axes[i].set_title(f'Distribuição de {coluna} por Cluster')
+
+    def plot_single_boxplot(dados_pca, coluna, cmap_name="viridis"):
+        fig = plt.figure(figsize=(6, 4))
+
+        grupos = sorted(dados_pca['Cluster'].unique())  # Garante mesma ordem de cor
+        cmap = plt.get_cmap(cmap_name)
+        cores = {grupo: cmap(i / len(grupos)) for i, grupo in enumerate(grupos)}
+
+        sns.boxplot(x='Cluster', y=coluna, data=dados_pca,
+                    palette=[cores[grupo] for grupo in grupos])
+
+        plt.title(f'Distribuição de {coluna} por Cluster')
         plt.tight_layout()
         return fig
 
-    st.title("Dashboard PCA e KMeans")
 
+
+    st.title("Dashboard PCA e KMeans")
     st.subheader("Análise de Componentes Principais (PCA) e KMeans")
+
+    st.markdown("""
+    **Metodologia:**
+    
+    Para esta análise, utilizamos as seguintes variáveis do dataset: 
+    - Sexo, convertido para valores numéricos: 0 para Masculino, 1 para Feminino
+    - Idade
+    - Mini Exame do Estado Mental (MMSE)
+    - Fator de Escala Atlas (ASF)
+    - Volume Cerebral Total Normalizado (nWBV)
+    - Escala Clínica de Demência
+    
+    Foi relizado um pré-processamento dos dados, onde as variáveis foram normalizadas e posteriormente aplicamos a técnica de PCA 
+    transformando-as em 3 componentes principais (PC1, PC2 e PC3) que capturam um 80%  da variação nos dados.
+    
+    Em seguida, aplicamos o algoritmo K-Means com 4 clusters para agrupar os casos com características similares 
+    no espaço reduzido pelo PCA.
+    
+    """)
+
+
 
     data_pca = load_data()
     dados_pca = preprocess_data(data_pca)
     pca_df = apply_pca(dados_pca)
     cluster_pca_df = apply_kmeans(pca_df)
+    dados_pca['Cluster'] = cluster_pca_df['Cluster'].values
+    
+    colunas_boxplot = ['Age', 'MMSE', 'ASF', 'nWBV', 'CDR']
 
-    # Exibir visualizações
-    st.pyplot(plot_3d_scatter(cluster_pca_df))
-    st.pyplot(plot_boxplots(dados_pca, cluster_pca_df))
+
+    # Criando duas colunas: a primeira ocupa 40% da largura e a segunda 60%
+    col_esquerda, col_direita = st.columns([1, 2])
+
+    # Coluna da esquerda - Apenas o gráfico 3D
+    with col_esquerda:
+        st.pyplot(plot_3d_scatter(cluster_pca_df))  # Gráfico isolado
+
+    # Coluna da direita - Boxplots em duas linhas
+    with col_direita:
+        # Primeira linha - 3 boxplots
+        col_topo1, col_topo2 = st.columns(2)
+        with col_topo1:
+            st.pyplot(plot_single_boxplot(dados_pca, colunas_boxplot[0]))
+        with col_topo2:
+            st.pyplot(plot_single_boxplot(dados_pca, colunas_boxplot[1]))
+            
+
+        # Segunda linha - 2 boxplots
+        col_base1, col_base2 = st.columns(2)
+        with col_base1:
+            st.pyplot(plot_single_boxplot(dados_pca, colunas_boxplot[3]))
+        with col_base2:
+            st.pyplot(plot_single_boxplot(dados_pca, colunas_boxplot[2]))
+
+        col_esq, col, col_dir = st.columns([1, 2, 1])
+        with col:
+            st.pyplot(plot_single_boxplot(dados_pca, colunas_boxplot[4]))
 
 
 with tab_simulacao:
@@ -844,16 +909,33 @@ with tab_simulacao:
         st.pyplot(plt)
 
     # Configuração do Streamlit
-    st.title("Dashboard de Análise de Alzheimer")
-
+    
     data_simulacao = load_data_simulacao()
     cdr_faixa_table, cdr_faixa_percent_table = preprocess_cdr_tables(data_simulacao)
     populacao_long = calcular_projecao_alzheimer()
     df_agrupado = calcular_projecao_cdr(populacao_long, cdr_faixa_percent_table)
 
-    # Exibir o gráfico principal ocupando toda a largura
-    st.subheader("Projeção de Pessoas com Alzheimer")
-    plot_alzheimer_projection(populacao_long)
+    # tabelas e grafico principal
+    st.subheader("Projeção de Pessoas com Alzheimer no Brasil (2024-2040)")
+
+    alzheimer_por_idade_brasil = pd.read_csv("arquivos/alzheimer_por_faixa_etaria.csv")
+
+    # Cria duas colunas com proporção 1:3
+    col1, col2 = st.columns([1, 3])
+
+    # Na primeira coluna (mais estreita), mostra a tabela
+    with col1:
+        st.subheader("Porcentagem de Pessoas com Alzheimer por Faixa Etária")
+        st.dataframe(
+            alzheimer_por_idade_brasil,
+            height=300,  # Altura fixa para melhor visualização
+            hide_index=True,  # Oculta o índice se não for relevante
+            use_container_width=True  # Usa toda a largura da coluna
+        )
+
+    # Na segunda coluna (mais larga), mostra o gráfico
+    with col2:
+        plot_alzheimer_projection(populacao_long)
 
     # Criar duas colunas abaixo do gráfico principal
     col1, col2 = st.columns(2)
@@ -868,13 +950,20 @@ with tab_simulacao:
 
 
 with tab_conclusoes:
-      st.subheader("Conclusões")
+    st.subheader("Conclusões")
 
-      with st.container(border=True): 
-                st.markdown("""
-                - Neste estudo, é um exemplo de que baixos resultados no MMSE são um sinal de alerta para possíveis casos de demência.
-
-                - Pode-se considerar realizar o MMSE a partir dos 60 anos.
-
-                - Exames de imagem são recomendados para fornecer uma conclusão após os resultados do MMSE.
-                """)
+    with st.container(border=True): 
+        st.markdown("""
+        <style>
+            .custom-text {
+                font-size: 20px;
+                font-weight: bold;
+            }
+        </style>
+        <div class="custom-text">
+        - Resultados baixos no Mini Exame de Estado Mental são um sinal de alerta para possíveis casos de demência.<br>
+        - Pode-se considerar realizar o MMSE a partir dos 60 anos.<br>
+        - Exames de imagem são recomendados para fornecer uma conclusão após os resultados do Exame de Estado Mental.<br>
+        - São necessarios políticas públicas para aumentar a conscientização sobre a demência e o Alzheimer, especialmente entre os idosos, para promover um diagnóstico precoce e intervenções adequadas.
+        </div>
+        """, unsafe_allow_html=True)
