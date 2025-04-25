@@ -64,11 +64,12 @@ data2 = load_data2()
 
 
 # Criando as abas
-title, tab1,  estudo, tab2, tab3, tab4, tab_pred, tab_pca, tab_simulacao = st.tabs(["-", "📌 Introdução ao Problema", "Estudo",  
-                                                  "📊 Introdução aos Dados", "📈 Análises", "Conclusões",
-                                                  "Predições", "PCA e Agrupamento", "Simulações"])
+tab_title, tab_intro_problema,  tab_estudo, tab_intro_dados, tab_analises, tab_pred, tab_pca, tab_simulacao, tab_conclusoes = st.tabs(["-", "📌 Introdução ao Problema", "Estudo",  
+                                                  "📊 Introdução aos Dados", "📈 Análises",
+                                                  "Predições", "PCA e Agrupamento", "Simulações",
+                                                  "Conclusões"])
 
-with title:
+with tab_title:
     st.markdown(
         """
         <h1 style="text-align: center; font-size: 40px; color: #0073e6;">
@@ -83,7 +84,7 @@ with title:
         st.image("image_title.webp", use_container_width =False,  width=400)
 
 
-with tab1:
+with tab_intro_problema:
     
     col1, col2 = st.columns([1, 1])
 
@@ -110,7 +111,7 @@ with tab1:
         st.image("sinais-de-alzheimer.jpg", caption="Sinais de Alzheimer", width=500)
 
 
-with estudo: 
+with tab_estudo: 
 
     st.subheader("Descrição da coleta dos dados:")
 
@@ -124,7 +125,7 @@ with estudo:
                     - Um conjunto de dados de confiabilidade é incluído contendo 20 sujeitos não dementes fotografados em uma visita subsequente dentro de 90 dias de sua sessão inicial.
             """)
 
-with tab2:
+with tab_intro_dados:
 
     
     # st.header("Introdução aos Dados")
@@ -136,25 +137,23 @@ with tab2:
 
     with col1:
         info_variaveis_ = {
-        "Variável": ["ID", "M/F", "Hand", "Age", "Educ", "SES", "eTIV", "ASF", "nWBV",  "MMSE", "CDR"],
-        "Definição": [
-            "Identification", "Gender", "Dominant Hand", "Age in years", 
-            "Education Level", "Socioeconomic Status", 
-            "Estimated Total Intracranial Volume",
-            "Atlas Scaling Factor",
-            "Normalize Whole Brain Volume",
-            "Mini Mental State Examination",  
-            "Clinical Dementia Rating"
-        ],
-        "Valores": [
-            " ", "M = Male, F = Female", "R = Right, L = Left", " ", 
-            "1 = < Ensino Médio\n2 = Ensino Médio Completo\n3 = Ensino Superior Incompleto\n4 = Ensino Superior Completo\n5 = Pós-Graduação",
-            "1 = Classe Baixa\n2 = Classe Média Baixa\n3 = Classe Média\n4 = Classe Média Alta\n5 = Classe Alta",
-            
-            
-            " ", " ", " ", " 0 - 30 ", 
-            "0 = Sem Demência\n0.5 = Demência Muito Leve\n1 = Demência Leve\n2 = Demência Moderada",
-        ]
+            "Variável": ["ID", "M/F", "Mão", "Idade", "Educ", "NSE", "eTIV", "ASF", "nWBV", "MMSE", "CDR"],
+            "Definição": [
+                "Identificação", "Gênero", "Mão Dominante", "Idade em anos", 
+                "Nível de Educação", "Nível Socioeconômico", 
+                "Volume Intracraniano Total Estimado",
+                "Fator de Escala Atlas",
+                "Volume Cerebral Total Normalizado",
+                "Mini Exame do Estado Mental",  
+                "Escala Clínica de Demência"
+            ],
+            "Valores": [
+                " ", "M = Masculino, F = Feminino", "R = Direita, L = Esquerda", " ", 
+                "1 = < Ensino Médio\n2 = Ensino Médio Completo\n3 = Ensino Superior Incompleto\n4 = Ensino Superior Completo\n5 = Pós-Graduação",
+                "1 = Classe Baixa\n2 = Classe Média Baixa\n3 = Classe Média\n4 = Classe Média Alta\n5 = Classe Alta",
+                " ", " ", " ", " 0 - 30 ", 
+                "0 = Sem Demência\n0.5 = Demência Muito Leve\n1 = Demência Leve\n2 = Demência Moderada",
+            ]
         }
         info_variaveis = pd.DataFrame(info_variaveis_)
         st.subheader("Tabela de Variáveis")
@@ -188,11 +187,11 @@ with tab2:
 
         st.image("mmse.jpg", use_container_width=False, width=800)
 
-with tab3:
+with tab_analises:
     
     # st.header("Análise de Correlação")
 
-    subtab1, subtab2, subtab3, subtab4 = st.tabs(["Distribuição de CDR", "Análise de Correlação", "vWBV vs CDR", "MMSE vs CDR"])
+    subtab1, subtab2, subtab3, subtab4 = st.tabs(["Distribuição de CDR", "Análise de Correlação", "nWBV vs CDR", "MMSE vs CDR"])
     
     
 
@@ -204,27 +203,36 @@ with tab3:
             cdr_table = data.groupby(['CDR']).size().reset_index(name='Count')
             
             cdr_descricao = {
-                    0.0: 'Sem demência',
-                    0.5: 'Demência muito leve',
-                    1.0: 'Demência leve',
-                    2.0: 'Demência moderada'
-                }
+                0.0: 'Sem demência',
+                0.5: 'Demência muito leve',
+                1.0: 'Demência leve',
+                2.0: 'Demência moderada'
+            }
 
-                        # Substituir os valores da coluna CDR
+            # Substituir os valores da coluna CDR
             cdr_table['Interpretação'] = cdr_table['CDR'].map(cdr_descricao)
-
             cdr_table = cdr_table[['CDR','Interpretação','Count']]
 
-            #st.dataframe(
-            #        cdr_table.style
-            #        .background_gradient(cmap='Blues', subset=['Count'])
-            #        .format({'Count': '{:,}', 'CDR': '{:.1f}'}),  # Formata números com separador de milhar
-            #        use_container_width=False,  # Não usar toda a largura
-            #        hide_index=True
-            #    )
-        
+            # Definir a paleta de cores personalizada
+            cores_personalizadas = {
+                0.0: '#4daf4a',  # Verde intermediário
+                0.5: '#ff9999',  # Vermelho leve
+                1.0: '#e41a1c',  # Vermelho intermediário
+                2.0: '#990000'   # Vermelho intenso
+            }
+
+            # Mapear as cores para cada interpretação
+            cdr_table['Cor'] = cdr_table['CDR'].map(cores_personalizadas)
+
             plt.figure(figsize=(4, 2))
-            ax = sns.barplot(x='Count', y='Interpretação', data=cdr_table, hue='Interpretação', palette='viridis', dodge=False)
+            ax = sns.barplot(
+                x='Count', 
+                y='Interpretação', 
+                data=cdr_table, 
+                hue='Interpretação', 
+                palette=cdr_table['Cor'].tolist(),  # Usar a lista de cores personalizadas
+                dodge=False
+            )
 
             # Adicionando os valores de contagem no final de cada barra
             for index, row in cdr_table.iterrows():
@@ -236,8 +244,11 @@ with tab3:
 
             # Adicionando títulos e rótulos
             plt.title('Distribuição de Casos por Tipo de Demência')
-            plt.xlabel('Contagem')
+            plt.xlabel('Número de Casos')
             plt.ylabel('Tipo de Demência')
+
+            # Remover a legenda de cores (opcional, já que os rótulos estão no eixo Y)
+            # ax.legend_.remove()
 
             # Exibindo o gráfico no Streamlit
             st.pyplot(plt, use_container_width=False)
@@ -245,8 +256,7 @@ with tab3:
         with col2:
             st.markdown("""
             - 100 dos sujeitos incluídos com mais de 60 anos foram clinicamente diagnosticados com doença de Alzheimer muito leve a moderada.
-            - Um conjunto de dados de confiabilidade é incluído contendo 20 sujeitos não dementes.
-            """)
+                        """)
         
 
     with subtab2:
@@ -301,15 +311,14 @@ with tab3:
         st.title("Análise Estatística de nWBV entre Pacientes com e sem Demência")
 
         fig2 = px.scatter(
-        data2,
+        data,
         x='Age',
         y='nWBV',
         color='CDR',
-        size='eTIV',
         hover_name='ID',
         title='Volume Cerebral Normalizado por Idade e CDR',
         labels={'Age': 'Idade', 'nWBV': 'Volume Cerebral Normalizado', 'CDR': 'CDR'},
-        color_discrete_sequence=['#6baed6', '#1f78b4', '#fb9a99', '#e31a1c']  
+        color_discrete_sequence=['#4daf4a', '#ff9999', '#e41a1c', '#990000']  
     )
         st.plotly_chart(fig2, use_container_width=True)
 
@@ -323,315 +332,324 @@ with tab3:
             pooled_std = np.sqrt(((nx-1)*np.std(x, ddof=1)**2 + (ny-1)*np.std(y, ddof=1)**2) / dof)
             return (np.mean(x) - np.mean(y)) / pooled_std
     
-        st.header("1. Distribuição de nWBV")
+        st.header("Distribuição do Volume Cerebral Total Normalizado")
     
-        col1, col2 = st.columns(2)
-        
-        # Gráficos individuais
+        # Definir paleta de cores
+        cor_nao_doentes = '#4daf4a'  # Verde
+        cor_doentes = '#ff7f00'      # Laranja intenso
+
+        # Criar 3 colunas (a terceira terá o dobro do tamanho)
+        col1, col2, col3 = st.columns([1, 1, 1.5])
+
+        # Gráficos de distribuição (colunas 1 e 2)
         with col1:
-            fig, ax = plt.subplots()
-            sns.histplot(nwbv_doentes_maiores_60['nWBV'], kde=True, color='red', label='CDR > 0')
-            plt.title("Distribuição para Doentes (CDR > 0)")
+            #st.subheader(" ")
+            fig, ax = plt.subplots(figsize=(4, 3))
+            sns.histplot(nwbv_doentes_maiores_60['nWBV'], kde=True, color=cor_doentes, label='CDR > 0')
+            plt.title("Distribuição - Doentes (CDR > 0)")
             plt.xlabel("nWBV")
             plt.legend()
             st.pyplot(fig)
 
         with col2:
-            fig, ax = plt.subplots()
-            sns.histplot(nwbv_nao_doentes_maiores_60['nWBV'], kde=True, color='green', label='CDR = 0')
-            plt.title("Distribuição para Não Doentes (CDR = 0)")
+            #st.subheader(" ")
+            fig, ax = plt.subplots(figsize=(4, 3))
+            sns.histplot(nwbv_nao_doentes_maiores_60['nWBV'], kde=True, color=cor_nao_doentes, label='CDR = 0')
+            plt.title("Distribuição - Não Doentes (CDR = 0)")
             plt.xlabel("nWBV")
             plt.legend()
             st.pyplot(fig)
 
-        # Gráfico de comparação - Boxplot
-        st.subheader("Comparação entre Grupos")
-        fig, ax = plt.subplots(figsize=(10, 6))
-
-        # Preparar os dados para comparação
-        nwbv_doentes_maiores_60['Grupo'] = 'CDR > 0'
-        nwbv_nao_doentes_maiores_60['Grupo'] = 'CDR = 0'
-        dados_comparacao = pd.concat([nwbv_doentes_maiores_60, nwbv_nao_doentes_maiores_60])
-
-        # Criar o boxplot
-        sns.boxplot(x='Grupo', y='nWBV', data=dados_comparacao,
-                    hue='Grupo', 
-                    palette={'CDR > 0': 'red', 'CDR = 0': 'green'}, 
-                    order=['CDR > 0', 'CDR = 0'],
-                    legend=False)
-
-        plt.title("Comparação de nWBV entre Doentes e Não Doentes (CDR > 0 vs CDR = 0)")
-        plt.ylabel("Valor de nWBV")
-        plt.xlabel("Grupo")
-        st.pyplot(fig)
-
+        # Boxplot (coluna 3 - mais larga)
+        with col3:
+            
+            fig, ax = plt.subplots(figsize=(8, 4))
+            
+            # Preparar os dados
+            nwbv_doentes_maiores_60['Grupo'] = 'CDR > 0'
+            nwbv_nao_doentes_maiores_60['Grupo'] = 'CDR = 0'
+            dados_comparacao = pd.concat([nwbv_doentes_maiores_60, nwbv_nao_doentes_maiores_60])
+            
+            # Criar o boxplot com a nova paleta
+            sns.boxplot(x='Grupo', y='nWBV', data=dados_comparacao,
+                        hue='Grupo', 
+                        palette={'CDR > 0': cor_doentes, 'CDR = 0': cor_nao_doentes},
+                        order=['CDR > 0', 'CDR = 0'],
+                        legend=False)
+            
+            plt.title("Comparação de nWBV: Doentes vs Não Doentes")
+            plt.ylabel("nWBV")
+            plt.xlabel("")
+            st.pyplot(fig)
 
 
         # Seção 2: Testes de Normalidade
         st.header("Testes de Normalidade (Shapiro-Wilk)")
+
+        # Container com largura reduzida para o slider
         with st.container():
-    
-            st.write("")  # Espaçamento
-            alpha1 = st.slider("Nível de significância (α)", 
-                            min_value=0.01, 
-                            max_value=0.10, 
-                            value=0.05, 
-                            step=0.01,
-                            help="Nível de significância para os testes estatísticos",
-                            key = "alpha_nwbv")
-    
-        
+            col_slider, _ = st.columns([0.4, 0.6])  # Slider ocupará apenas 40% da largura
+            
+            with col_slider:
+                alpha1 = st.slider("Nível de significância (α)", 
+                                min_value=0.01, 
+                                max_value=0.10, 
+                                value=0.05, 
+                                step=0.01,
+                                help="Nível de significância para os testes estatísticos",
+                                key="alpha_nwbv")
+
+        # Realizar os testes
         stat_doentes, p_doentes = shapiro(nwbv_doentes_maiores_60['nWBV'])
         stat_nao_doentes, p_nao_doentes = shapiro(nwbv_nao_doentes_maiores_60['nWBV'])
-        
+
+        # Exibir resultados em colunas
         norm_col1, norm_col2 = st.columns(2)
-        
+
         with norm_col1:
-            st.metric(label="Doentes (CDR > 0)", 
-                    value=f"p = {p_doentes:.4f}",
-                    help="H₀: Os dados são normalmente distribuídos")
-            st.write("Conclusão:", "Normal" if p_doentes > alpha1 else "Não normal")
-        
+            # Card expandido para Doentes
+            with st.expander("**Doentes (CDR > 0)**", expanded=True):
+                st.markdown(f"""
+                - **Estatística do teste:** {stat_doentes:.4f}
+                - **Valor-p:** {p_doentes:.4f}
+                - **α selecionado:** {alpha1}
+                """)
+                st.markdown(f"#### Conclusão: {'Normal' if p_doentes > alpha1 else 'Não normal'}")
+
         with norm_col2:
-            st.metric(label="Não Doentes (CDR = 0)", 
-                    value=f"p = {p_nao_doentes:.4f}",
-                    help="H₀: Os dados são normalmente distribuídos")
-            st.write("Conclusão:", "Normal" if p_nao_doentes > alpha1 else "Não normal")
+            # Card expandido para Não Doentes
+            with st.expander("**Não Doentes (CDR = 0)**", expanded=True):
+                st.markdown(f"""
+                - **Estatística do teste:** {stat_nao_doentes:.4f}
+                - **Valor-p:** {p_nao_doentes:.4f}
+                - **α selecionado:** {alpha1}
+                """)
+                st.markdown(f"#### Conclusão: {'Normal' if p_nao_doentes > alpha1 else 'Não normal'}")
         
         # Seção 3: Teste T e Tamanho do Efeito
-        st.header("3. Comparação entre Grupos")
-        
+        st.header("Comparação entre Grupos")
+
+        # Cálculos estatísticos
         t_stat, p_valor = ttest_ind(
             nwbv_doentes_maiores_60['nWBV'],
             nwbv_nao_doentes_maiores_60['nWBV'],
             alternative='less'
         )
-        
+
         d = cohens_d(nwbv_doentes_maiores_60['nWBV'], nwbv_nao_doentes_maiores_60['nWBV'])
-        
-        st.subheader("Teste T para Amostras Independentes")
-        st.write(f"""
-        - **Hipótese nula (H₀):** Não há diferença no nWBV entre os grupos (ou doentes têm nWBV maior/igual)
-        - **Hipótese alternativa (H₁):** Doentes têm nWBV menor (teste unilateral)
-        """)
-        
-        st.metric(label="Valor-p", 
-                value=f"{p_valor:.6f}",
-                delta="Significativo" if p_valor < alpha1 else "Não significativo",
-                delta_color="inverse")
-        
-        st.write(f"**Conclusão:** {'Rejeitamos H₀' if p_valor < alpha1 else 'Não rejeitamos H₀'} a um α = {alpha1}")
-        
-        st.subheader("Tamanho do Efeito (Cohen's d)")
-        
-        effect_size = st.container()
-        with effect_size:
-            col1, col2 = st.columns([1, 3])
+
+        # Layout em duas colunas
+        col_t, col_d = st.columns(2)
+
+        # Coluna 1 - Teste T
+        with col_t:
+            st.subheader("Teste T para Amostras Independentes")
             
-            with col1:
-                st.metric(label="Cohen's d", value=f"{d:.2f}")
-            
-            with col2:
-                st.write("""
-                | Valor | Interpretação |
-                |-------|---------------|
-                | 0.2   | Pequeno       |
-                | 0.5   | Médio         |
-                | 0.8   | Grande        |
-                """)
-                st.write(f"**Interpretação:** {'Grande' if abs(d) >= 0.8 else 'Médio' if abs(d) >= 0.5 else 'Pequeno'} efeito")
-
-
-
-    with subtab4:
-        
-        st.header("Análise Comparativa de MMSE entre Pacientes com e sem Demência")
-
-        col1, col2 = st.columns([2, 1])
-        
-        with col1:
-            custom_colors = ['#6baed6', '#1f78b4', '#fb9a99', '#e31a1c']   # Azul claro, azul escuro, vermelho claro, vermelho escuro
-
-            # Criando o gráfico
-            fig5 = px.histogram(
-                data,
-                x='MMSE',
-                color='CDR',
-                nbins=20,
-                title='Distribuição do MMSE por CDR',
-                labels={'MMSE': 'Pontuação MMSE', 'CDR': 'CDR'},
-                color_discrete_sequence=custom_colors  # Usando a paleta de cores personalizada
-            )
-
-            st.plotly_chart(fig5, use_container_width=False)
-
-        with col2:
-            with st.container(border=True): 
+            with st.expander("Hipóteses", expanded=True):
                 st.markdown("""
-                Temos que 82% dos pacientes considerados obtiveram resultado superior a 23 no MMSE, 
-                onde 70% deles apresentaram um CDR = 0 e um 27% apresentaram CDR = 0.5. 
-                E 100% dos pacientes com CDR = 0 obtiveram resultado superior a 23.
+                - **H₀ (Nula):** μ₁ ≥ μ₂ (Doentes têm nWBV maior/igual)
+                - **H₁ (Alternativa):** μ₁ < μ₂ (Doentes têm nWBV menor)
                 """)
-
-
-        
-    
-        with st.container():
-            st.write("")  # Espaçamento
-            nivel_significancia  = st.slider("Nível de significância (α)", 
-                    min_value=0.01, 
-                    max_value=0.10, 
-                    value=0.05, 
-                    step=0.01,
-                    help="Nível de significância para os testes estatísticos",
-                    key = "alpha_mmse")
-
-          
-        idade_minima = 60
-
-
-        #  Filtrar os dados
-        mmse_doentes = data.loc[(data['Age'] > idade_minima) & (data['CDR'] > 0), ['MMSE']].reset_index(drop=True)
-        mmse_nao_doentes = data.loc[(data['Age'] > idade_minima) & (data['CDR'] == 0), ['MMSE']].reset_index(drop=True)
-
-        # Layout em colunas
-        col1, col2 = st.columns(2)
-
-        # Coluna 1: Estatísticas Descritivas
-        with col1:
-            # Teste de normalidade
-            st.write("**Teste de Normalidade (Shapiro-Wilk):**")
-            stat_doentes, p_doentes = shapiro(mmse_doentes['MMSE'])
-            stat_nao_doentes, p_nao_doentes = shapiro(mmse_nao_doentes['MMSE'])
             
-            st.write(f"- Pacientes com CDR > 0: p-valor = {p_doentes:.4f}")
-            st.write(f"- Pacientes com CDR = 0: p-valor = {p_nao_doentes:.4f}")
+            st.markdown(f"""
+            **Resultados:**
+            - Estatística t = `{t_stat:.4f}`
+            - Graus de liberdade = `{len(nwbv_doentes_maiores_60) + len(nwbv_nao_doentes_maiores_60) - 2}`
+            """)
             
-            # Interpretação
-            if p_doentes < 0.05 or p_nao_doentes < 0.05:
-                st.warning("Os dados não seguem uma distribuição normal (p < 0.05). Usando teste não paramétrico.")
+            st.metric(label="Valor-p", 
+                    value=f"{p_valor:.4f}",
+                    delta="Significativo" if p_valor < alpha1 else "Não significativo",
+                    delta_color="inverse")
+            
+            st.markdown(f"""
+            ### Conclusão do Teste T
+            {'✅ **Rejeitamos H₀** (p < α)' if p_valor < alpha1 else '❌ **Não rejeitamos H₀** (p ≥ α)'}  
+            α = {alpha1}
+            """)
+
+        # Coluna 2 - Tamanho do Efeito
+        with col_d:
+            st.subheader("Tamanho do Efeito (Cohen's d)")
+            
+            st.markdown(f"""
+            **Valor calculado:**  
+            `d = {d:.2f}`
+            """)
+            
+            st.markdown("""
+            **Escala de referência:**
+            | d    | Interpretação |
+            |------|---------------|
+            | 0.2  | Pequeno       |
+            | 0.5  | Médio         |
+            | 0.8  | Grande        |
+            """)
+            
+            # Determinar interpretação
+            abs_d = abs(d)
+            if abs_d >= 0.8:
+                interpretacao = "**Grande efeito** 🟠"
+            elif abs_d >= 0.5:
+                interpretacao = "**Médio efeito** 🟡"
             else:
-                st.success("Os dados seguem uma distribuição normal (p ≥ 0.05). Pode-se usar teste paramétrico.")
-
-        # Coluna 2: Testes Estatísticos
-        with col2:
-                    
+                interpretacao = "**Pequeno efeito** 🟢"
             
-            # Teste de Mann-Whitney
-            st.write("\n**Teste de Mann-Whitney U (diferença entre grupos):**")
-            u_stat, p_valor = mannwhitneyu(
-                mmse_doentes['MMSE'],
-                mmse_nao_doentes['MMSE'],
-                alternative='less'
-            )
-            
-            st.write(f"- Estatística U = {u_stat:.2f}")
-            st.write(f"- p-valor = {p_valor:.4f}")
-            
-            # Interpretação do resultado
-            st.write("\n**Interpretação:**")
-            st.write("Hipótese nula (H₀): Não há diferença no MMSE entre os grupos.")
-            st.write("Hipótese alternativa (H₁): Pacientes com demência (CDR>0) têm MMSE menor.")
-            
-            if p_valor < nivel_significancia:
-                st.error(f"Rejeitamos H₀ (p < {nivel_significancia}). Há evidências de que pacientes com demência têm MMSE significativamente menor.")
-            else:
-                st.success(f"Não rejeitamos H₀ (p ≥ {nivel_significancia}). Não há evidências suficientes para afirmar que pacientes com demência têm MMSE menor.")
-
-        # Gráficos
-        st.subheader("Visualização dos Dados")
-
-        mmse_doentes['Grupo'] = 'CDR > 0'
-        mmse_nao_doentes['Grupo'] = 'CDR = 0'
-        dados_comparacao_mmse = pd.concat([mmse_doentes, mmse_nao_doentes])
-
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
-
-        # Boxplot
-        
-        # Criar o boxplot
-        sns.boxplot(x='Grupo', y='MMSE', data=dados_comparacao_mmse,
-                    hue='Grupo', 
-                    palette={'CDR > 0': 'red', 'CDR = 0': 'green'}, 
-                    order=['CDR > 0', 'CDR = 0'],
-                    ax=ax1,
-                    legend=False)
-        
-        ax1.set_xticks([0, 1])  # Explicitly set ticks before labels
-        ax1.set_xticklabels(['CDR > 0', 'CDR = 0'])  # Fixed order to match the boxplot
-        ax1.set_title('Distribuição de MMSE entre Doentes e Não Doentes')
-        ax1.set_ylabel('Pontuação MMSE')
-        ax1.set_xlabel('Grupo')
-        
-
-        # Histograma
-        sns.histplot(mmse_nao_doentes['MMSE'], color='skyblue', label='CDR = 0', 
-                    kde=True, ax=ax2, alpha=0.5)
-        sns.histplot(mmse_doentes['MMSE'], color='salmon', label='CDR > 0', 
-                    kde=True, ax=ax2, alpha=0.5)
-        ax2.set_xlabel('Pontuação MMSE')
-        ax2.set_ylabel('Frequência')
-        ax2.set_title('Distribuição de MMSE')
-        ax2.legend()
-
-        st.pyplot(fig)
-
-        # Informações adicionais
-        with st.expander("Sobre esta análise"):
-            st.write("""
-            **Metodologia:**
-            - Comparação de pontuações MMSE entre pacientes com e sem demência (CDR > 0 vs CDR = 0)
-            - Teste de Shapiro-Wilk para verificar normalidade dos dados
-            - Teste U de Mann-Whitney (não paramétrico) para comparar os grupos
-            
-            **MMSE (Mini-Mental State Examination):**
-            - Avaliação cognitiva com pontuação de 0 a 30
-            - Pontuações mais baixas indicam maior comprometimento cognitivo
-            
-            **CDR (Clinical Dementia Rating):**
-            - 0: Sem demência
-            - 0.5: Demência questionável
-            - 1: Demência leve
-            - 2: Demência moderada
+            st.markdown(f"""
+            ### Interpretação
+            {interpretacao}  
+            Direção: {'Negativo' if d < 0 else 'Positivo'}
             """)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-with tab4:
-      st.subheader("Conclusões")
-
-      with st.container(border=True): 
+    with subtab4:
+        st.header("Análise Comparativa Exame Mental entre Pacientes com e sem Demência")
+        
+        # =============================================
+        # Seção 1: Visualização dos Dados
+        # =============================================
+        
+        # Criar duas colunas para os gráficos
+        col_graph1, col_graph2 = st.columns(2)
+        
+        with col_graph1:
+            # Gráfico de Strip
+            custom_colors = ['#4daf4a', '#ff9999', '#e41a1c', '#990000']   
+            fig_strip = px.strip(
+                data2,
+                y='MMSE',
+                x='CDR',
+                color='CDR',
+                stripmode='overlay',
+                title='Distribuição Individual de Pontuações do Exame Mental ',
+                labels={'MMSE': 'Pontuação Exame Mental ', 'CDR': 'Grau de Demência'},
+                color_discrete_sequence=custom_colors
+            )
+            fig_strip.update_traces(jitter=0.3)
+            st.plotly_chart(fig_strip, use_container_width=True)
+        
+        with col_graph2:
+            # Gráfico de Boxplot
+            mmse_doentes = data.loc[(data['Age'] > 60) & (data['CDR'] > 0), ['MMSE']].copy()
+            mmse_nao_doentes = data.loc[(data['Age'] > 60) & (data['CDR'] == 0), ['MMSE']].copy()
+            
+            mmse_doentes['Grupo'] = 'CDR > 0'
+            mmse_nao_doentes['Grupo'] = 'CDR = 0'
+            dados_comparacao = pd.concat([mmse_doentes, mmse_nao_doentes])
+            
+            fig_box = px.box(
+                dados_comparacao,
+                x='Grupo',
+                y='MMSE',
+                color='Grupo',
+                color_discrete_map={'CDR > 0': '#ff7f00', 'CDR = 0': '#4daf4a'},
+                title='Distribuição de Pontuação Exame Mental  Entre Doentes e Não Doentes',
+                labels={'MMSE': 'Pontuação Exame Mental ', 'Grupo': 'Divisão por Doentes e não Doentes'},       
+                )
+            fig_box.update_layout(showlegend=False)
+            st.plotly_chart(fig_box, use_container_width=True)
+        
+        
+        st.subheader("Análise Estatística")
+        
+        # Configuração do teste
+        with st.container():
+            col_slider, _ = st.columns([0.3, 0.7])
+            with col_slider:
+                alpha = st.slider("Nível de significância (α)", 
+                                min_value=0.01, max_value=0.10, 
+                                value=0.05, step=0.01,
+                                help="Limiar para decisão estatística",
+                                key="alpha_mmse")
+        
+        # Layout em colunas para os testes
+        col_test1, col_test2 = st.columns(2)
+        
+        with col_test1:
+            # Teste de Normalidade
+            with st.expander("Teste de Normalidade (Shapiro-Wilk)", expanded=True):
+                stat_d, p_d = shapiro(mmse_doentes['MMSE'])
+                stat_nd, p_nd = shapiro(mmse_nao_doentes['MMSE'])
+                
                 st.markdown("""
-                - Neste estudo, é um exemplo de que baixos resultados no MMSE são um sinal de alerta para possíveis casos de demência.
-
-                - Pode-se considerar realizar o MMSE a partir dos 60 anos.
-
-                - Exames de imagem são recomendados para fornecer uma conclusão após os resultados do MMSE.
+                **Hipóteses:**
+                - H₀: Os dados seguem uma distribuição normal
+                - H₁: Os dados não seguem uma distribuição normal
                 """)
+                
+                st.markdown(f"""
+                **Resultados:**
+                - **CDR > 0 (Doentes):**
+                - Estatística W = `{stat_d:.4f}`, p-valor = `{p_d:.4f}`
+                
+                - **CDR = 0 (Não Doentes):**
+                - Estatística W = `{stat_nd:.4f}`,  p-valor = `{p_nd:.4f}`
+                """)
+                
+                if p_d < 0.05 or p_nd < 0.05:
+                    st.warning("""
+                    **Conclusão:**  
+                    Pelo menos um grupo não segue distribuição normal (p < 0.05).  
+                    Recomendado usar teste não-paramétrico.
+                    """)
+                else:
+                    st.success("""
+                    **Conclusão:**  
+                    Ambos grupos seguem distribuição normal (p ≥ 0.05).  
+                    Pode-se usar teste paramétrico.
+                    """)
+        
+        with col_test2:
+            # Teste de Mann-Whitney
+            with st.expander("Teste de Mann-Whitney U", expanded=True):
+                u_stat, p_valor = mannwhitneyu(
+                    mmse_doentes['MMSE'],
+                    mmse_nao_doentes['MMSE'],
+                    alternative='less'
+                )
+                
+                st.markdown("""
+                **Hipóteses:**
+                - H₀: Não há diferença entre os grupos
+                - H₁: CDR > 0 tem MMSE menor (teste unilateral)
+                """)
+                
+                st.markdown(f"""
+                **Resultados:**
+                - Estatística U = `{u_stat:.2f}`
+                - p-valor = `{p_valor:.6f}`
+                """)
+                
+                if p_valor < alpha:
+                    st.error(f"""
+                    **Conclusão Final:**  
+                    Rejeitamos H₀ (p < {alpha})  
+                    Há evidências de que pacientes com demência têm MMSE significativamente menor.
+                    """)
+                else:
+                    st.success(f"""
+                    **Conclusão Final:**  
+                    Não rejeitamos H₀ (p ≥ {alpha})  
+                    Não há evidências suficientes para afirmar diferença significativa.
+                    """)
+        # =============================================
+        # Seção 4: Informações Adicionais
+        # =============================================
+        with st.expander("📌 Sobre a Análise", expanded=False):
+            st.markdown("""
+            **Metodologia:**
+            - População: Pacientes acima de 60 anos
+            - Variável resposta: Pontuação Exame Mental (0-30)
+            - Grupos comparados: CDR = 0 vs CDR > 0
+            - Testes utilizados:
+            -- Shapiro-Wilk (normalidade)
+            -- Mann-Whitney U (diferença entre grupos)
+            
+            **Interpretação Clínica:**
+            - MMSE < 24 sugere comprometimento cognitivo
+            - CDR > 0 indica algum grau de demência
+            """)
+
 
 with tab_pred:
     # Carregar o modelo salvo
@@ -847,3 +865,16 @@ with tab_simulacao:
     with col2:
         st.subheader("Tabela de Projeção por CDR")
         st.write(df_agrupado)
+
+
+with tab_conclusoes:
+      st.subheader("Conclusões")
+
+      with st.container(border=True): 
+                st.markdown("""
+                - Neste estudo, é um exemplo de que baixos resultados no MMSE são um sinal de alerta para possíveis casos de demência.
+
+                - Pode-se considerar realizar o MMSE a partir dos 60 anos.
+
+                - Exames de imagem são recomendados para fornecer uma conclusão após os resultados do MMSE.
+                """)
